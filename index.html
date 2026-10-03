@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark" />
+  <title>ASVAB Practice Test – Complete Question Bank</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            base: { 900:'#0f1219', 800:'#1a1e2e', 700:'#252a3d', 600:'#2f3550', 500:'#3a4163' },
+            mil: { green:'#4a9c59', greenlt:'#5cb86d', greendk:'#3a7c47', gold:'#c8a84b', goldlt:'#dbbe6a', golddm:'#a88a3a' },
+            afqt: '#e85d04',
+            correct: '#22c55e',
+            wrong: '#ef4444',
+            txt: { 100:'#e2e8f0', 200:'#cbd5e1', 300:'#94a3b8', 400:'#64748b' },
+            sect: { gs:'#2563eb', ar:'#e85d04', wk:'#e85d04', pc:'#e85d04', mk:'#e85d04', ei:'#7c3aed', as:'#b45309', mc:'#065f46', ao:'#1d4ed8' }
+          },
+          fontFamily: {
+            sans: ['Inter','sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+  <script src="https://unpkg.com/lucide@latest" defer></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { background: #0f1219; color: #e2e8f0; font-family: 'Inter', sans-serif; margin:0; }
+    .screen { display: none; }
+    .screen.active { display: block; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+    .fade-in { animation: fadeIn .4s ease-out forwards; }
+    @keyframes scoreFill { from{stroke-dashoffset:440} }
+    .score-circle { animation: scoreFill 1.5s ease-out forwards; }
+    @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+    .pulse-anim { animation: pulse 1.5s infinite; }
+    .timer-bar { transition: width .5s linear; }
+    .choice-btn { transition: all .2s ease; }
+    .choice-btn:hover:not(.answered) { transform: translateX(6px); border-color: #c8a84b; }
+    .choice-btn.correct-ans { background: rgba(34,197,94,.15) !important; border-color: #22c55e !important; color: #22c55e !important; }
+    .choice-btn.wrong-ans { background: rgba(239,68,68,.15) !important; border-color: #ef4444 !important; color: #ef4444 !important; }
+    .mil-star { display:inline-flex; align-items:center; justify-content:center; width:64px; height:64px; background:linear-gradient(135deg,#3a7c47,#4a9c59); border-radius:50%; border:3px solid #c8a84b; }
+    .section-card { transition: all .25s ease; cursor:pointer; }
+    .section-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0,0,0,.4); }
+    .progress-fill { transition: width .3s ease; }
+    .afqt-badge { background: #e85d04; color:#fff; font-size:10px; font-weight:700; padding:2px 6px; border-radius:4px; text-transform:uppercase; letter-spacing:.5px; }
+    .study-toggle { position:relative; width:48px; height:26px; background:#3a4163; border-radius:13px; cursor:pointer; transition:background .2s; }
+    .study-toggle.on { background:#4a9c59; }
+    .study-toggle::after { content:''; position:absolute; top:3px; left:3px; width:20px; height:20px; background:#e2e8f0; border-radius:50%; transition:transform .2s; }
+    .study-toggle.on::after { transform:translateX(22px); }
+    ::-webkit-scrollbar { width:6px; }
+    ::-webkit-scrollbar-track { background:#1a1e2e; }
+    ::-webkit-scrollbar-thumb { background:#3a4163; border-radius:3px; }
+    @keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    .slide-up { animation: slideUp .5s ease-out forwards; }
+    .kb-hint { font-size:10px; color:#64748b; border:1px solid #3a4163; border-radius:4px; padding:1px 5px; margin-left:4px; }
+  </style>
+</head>
+<body data-id="0" class="min-h-screen">
+  <app-icon data-id="1" hidden data-icon="shield" data-palette="Green"></app-icon>
+
+  <!-- ========== HOME SCREEN ========== -->
+  <div data-id="2" id="home-screen" class="screen active">
+    <nav data-id="3" class="bg-base-800 border-b border-base-600 px-4 md:px-8 py-3 flex items-center justify-between">
+      <div data-id="4" class="flex items-center gap-3">
+        <div data-id="5" class="mil-star"><i data-id="6" data-lucide="shield" class="w-7 h-7 text-white"></i></div>
+        <div data-id="7">
+          <h1 data-id="8" class="text-lg md:text-xl font-extrabold tracking-wide uppercase text-txt-100">ASVAB Practice Test</h1>
+          <p data-id="9" class="text-xs text-txt-300 tracking-widest uppercase">Armed Services Vocational Aptitude Battery</p>
+        </div>
+      </div>
+      <div data-id="10" class="hidden md:flex items-center gap-4">
+        <span data-id="11" class="text-xs text-txt-400">Welcome, Brian</span>
+        <button data-id="12" id="reset-scores-btn" class="text-xs text-mil-gold hover:text-mil-goldlt flex items-center gap-1 min-h-[44px] px-3">
+          <i data-id="13" data-lucide="rotate-ccw" class="w-3 h-3"></i> Reset Scores
+        </button>
+      </div>
+      <button data-id="14" id="mobile-menu-btn-home" class="md:hidden p-2 min-h-[44px] min-w-[44px]">
+        <i data-id="15" data-lucide="menu" class="w-6 h-6 text-txt-100"></i>
+      </button>
+    </nav>
+
+    <nav data-id="16" id="mobile-menu-home" class="hidden fixed inset-0 bg-base-900 z-50 flex flex-col p-6">
+      <button data-id="17" id="mobile-menu-close-home" class="self-end p-2 min-h-[44px] min-w-[44px]">
+        <i data-id="18" data-lucide="x" class="w-6 h-6 text-txt-100"></i>
+      </button>
+      <div data-id="19" class="mt-8 flex flex-col gap-6">
+        <span data-id="20" class="text-sm text-txt-300">Welcome, Brian</span>
+        <button data-id="21" id="reset-scores-mobile" class="text-sm text-mil-gold flex items-center gap-2 min-h-[44px]">
+          <i data-id="22" data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset All Scores
+        </button>
+      </div>
+    </nav>
+
+    <main data-id="23" class="max-w-6xl mx-auto px-4 md:px-8 py-8 md:py-12 fade-in">
+      <!-- Hero -->
+      <div data-id="24" class="text-center mb-10">
+        <div data-id="25" class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-mil-greendk to-mil-green border-4 border-mil-gold mb-4">
+          <i data-id="26" data-lucide="shield" class="w-10 h-10 text-white"></i>
+        </div>
+        <h2 data-id="27" class="text-2xl md:text-4xl font-black uppercase tracking-tight text-txt-100 mb-2">ASVAB Practice Test</h2>
+        <p data-id="28" class="text-sm md:text-base text-txt-300 max-w-xl mx-auto mb-5">Master every section of the Armed Services Vocational Aptitude Battery with 216 practice questions across all 9 subtests.</p>
+        <!-- AFQT Info Badge -->
+        <div data-id="29" id="afqt-badge-home" class="inline-flex items-center gap-3 bg-base-700 rounded-xl px-5 py-3 border border-base-600">
+          <span data-id="30" class="afqt-badge">AFQT</span>
+          <span data-id="31" class="text-xs text-txt-200">Core Sections:</span>
+          <span data-id="32" class="text-xs font-bold text-afqt">AR · WK · PC · MK</span>
+        </div>
+      </div>
+
+      <!-- Mode Selection -->
+      <div data-id="33" class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-10 max-w-2xl mx-auto">
+        <button data-id="34" id="mode-section-btn" class="bg-base-700 border-2 border-mil-green rounded-2xl p-6 text-left hover:border-mil-greenlt hover:bg-base-600 transition-all min-h-[44px] group">
+          <div data-id="35" class="flex items-center gap-3 mb-2">
+            <i data-id="36" data-lucide="layout-grid" class="w-6 h-6 text-mil-green group-hover:text-mil-greenlt"></i>
+            <h3 data-id="37" class="text-lg font-bold uppercase text-txt-100">Section Practice</h3>
+          </div>
+          <p data-id="38" class="text-sm text-txt-300">Pick a specific subtest and practice at your own pace with timed or study mode.</p>
+        </button>
+        <button data-id="39" id="mode-full-btn" class="bg-base-700 border-2 border-mil-gold rounded-2xl p-6 text-left hover:border-mil-goldlt hover:bg-base-600 transition-all min-h-[44px] group">
+          <div data-id="40" class="flex items-center gap-3 mb-2">
+            <i data-id="41" data-lucide="clock" class="w-6 h-6 text-mil-gold group-hover:text-mil-goldlt"></i>
+            <h3 data-id="42" class="text-lg font-bold uppercase text-txt-100">Full Practice Test</h3>
+          </div>
+          <p data-id="43" class="text-sm text-txt-300">All 9 sections with real ASVAB time limits. 216 questions total.</p>
+        </button>
+      </div>
+
+      <!-- Study Mode Toggle -->
+      <div data-id="44" class="flex items-center justify-center gap-3 mb-8">
+        <span data-id="45" class="text-sm text-txt-300">Timed Mode</span>
+        <div data-id="46" id="study-toggle-btn" class="study-toggle" role="switch" aria-checked="false" tabindex="0"></div>
+        <span data-id="47" class="text-sm text-txt-300">Study Mode</span>
+        <span data-id="48" class="text-xs text-txt-400 hidden md:inline">(No timer, see answers immediately)</span>
+      </div>
+
+      <!-- Section Cards -->
+      <h3 data-id="49" class="text-sm font-bold uppercase tracking-widest text-mil-gold mb-4 text-center">Choose a Section</h3>
+      <div data-id="50" id="section-cards-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+        <!-- Cards generated by JS -->
+      </div>
+
+      <!-- High Scores -->
+      <div data-id="51" id="high-scores-section" class="mt-12">
+        <h3 data-id="52" class="text-sm font-bold uppercase tracking-widest text-mil-gold mb-4 flex items-center gap-2">
+          <i data-id="53" data-lucide="trophy" class="w-4 h-4"></i> Your Best Scores
+        </h3>
+        <div data-id="54" id="high-scores-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          <!-- Filled by JS -->
+        </div>
+      </div>
+    </main>
+
+    <footer data-id="55" class="py-6 text-center border-t border-base-700 mt-8">
+      <p data-id="56" class="text-xs text-txt-400 mb-1">Made by Copilot</p>
+      <p data-id="57" class="text-[10px] text-txt-400 opacity-60">Powered by ASVAB For Dummies &amp; ASVAB Secrets study guides</p>
+    </footer>
+  </div>
+
+  <!-- ========== QUIZ SCREEN ========== -->
+  <div data-id="58" id="quiz-screen" class="screen">
+    <nav data-id="59" class="bg-base-800 border-b border-base-600 px-4 md:px-8 py-3 flex items-center justify-between">
+      <button data-id="60" id="quiz-back-btn" class="flex items-center gap-2 text-txt-200 hover:text-mil-gold min-h-[44px] min-w-[44px]">
+        <i data-id="61" data-lucide="arrow-left" class="w-5 h-5"></i>
+        <span data-id="62" class="hidden md:inline text-sm font-medium">Back to Home</span>
+      </button>
+      <div data-id="63" class="flex items-center gap-2">
+        <span data-id="64" id="quiz-section-badge" class="text-xs font-bold uppercase px-3 py-1 rounded-md"></span>
+        <span data-id="65" id="quiz-section-name" class="text-sm font-bold text-txt-100 uppercase hidden md:inline"></span>
+      </div>
+      <div data-id="66" class="flex items-center gap-3">
+        <div data-id="67" id="timer-display" class="flex items-center gap-1 text-sm font-mono font-bold text-mil-green">
+          <i data-id="68" data-lucide="timer" class="w-4 h-4"></i>
+          <span data-id="69" id="timer-text">11:00</span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Timer Bar -->
+    <div data-id="70" class="w-full h-1 bg-base-700">
+      <div data-id="71" id="timer-bar" class="timer-bar h-full bg-mil-green rounded-r-full" style="width:100%"></div>
+    </div>
+
+    <main data-id="72" class="max-w-3xl mx-auto px-4 md:px-8 py-6 md:py-10 fade-in">
+      <!-- Progress -->
+      <div data-id="73" class="flex items-center justify-between mb-2">
+        <span data-id="74" id="quiz-progress-text" class="text-xs font-semibold text-txt-300 uppercase tracking-wide">Question 1 of 25</span>
+        <span data-id="75" id="quiz-score-live" class="text-xs text-txt-400"></span>
+      </div>
+      <div data-id="76" class="w-full h-2 bg-base-700 rounded-full mb-8">
+        <div data-id="77" id="quiz-progress-bar" class="progress-fill h-full bg-mil-green rounded-full" style="width:0%"></div>
+      </div>
+
+      <!-- Question Card -->
+      <div data-id="78" id="question-card" class="bg-base-700 rounded-2xl p-6 md:p-8 mb-6 border border-base-600">
+        <p data-id="79" id="question-number-label" class="text-xs font-bold uppercase text-mil-gold mb-3 tracking-wide"></p>
+        <p data-id="80" id="question-text" class="text-lg md:text-xl font-semibold text-txt-100 leading-relaxed"></p>
+        <!-- Passage block for PC questions -->
+        <div data-id="81" id="passage-block" class="hidden mt-4 p-4 bg-base-800 rounded-xl border border-base-600 text-sm text-txt-200 leading-relaxed italic"></div>
+      </div>
+
+      <!-- Choices -->
+      <div data-id="82" id="choices-container" class="flex flex-col gap-3 mb-6">
+        <!-- Generated by JS -->
+      </div>
+
+      <!-- Explanation -->
+      <div data-id="83" id="explanation-box" class="hidden bg-base-700 rounded-2xl p-5 mb-6 border border-mil-greendk slide-up">
+        <div data-id="84" class="flex items-center gap-2 mb-2">
+          <i data-id="85" data-lucide="info" class="w-4 h-4 text-mil-gold"></i>
+          <span data-id="86" class="text-xs font-bold uppercase text-mil-gold tracking-wide">Explanation</span>
+        </div>
+        <p data-id="87" id="explanation-text" class="text-sm text-txt-200 leading-relaxed"></p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div data-id="88" class="flex items-center justify-between gap-3">
+        <button data-id="89" id="skip-btn" class="flex items-center gap-2 text-sm text-txt-400 hover:text-txt-200 min-h-[44px] px-4 bg-base-700 rounded-xl border border-base-600 hover:border-base-500 transition-all">
+          <i data-id="90" data-lucide="skip-forward" class="w-4 h-4"></i> Skip
+        </button>
+        <button data-id="91" id="next-btn" class="hidden flex items-center gap-2 text-sm font-bold text-base-900 bg-mil-green hover:bg-mil-greenlt min-h-[44px] px-6 rounded-xl transition-all uppercase tracking-wide">
+          Next <i data-id="92" data-lucide="arrow-right" class="w-4 h-4"></i>
+          <span data-id="93" class="kb-hint text-base-900 border-base-900">Enter</span>
+        </button>
+      </div>
+
+      <!-- Keyboard Hints -->
+      <div data-id="94" class="mt-6 text-center hidden md:block">
+        <p data-id="95" class="text-[10px] text-txt-400">Press <span data-id="96" class="kb-hint">1</span><span data-id="97" class="kb-hint">2</span><span data-id="98" class="kb-hint">3</span><span data-id="99" class="kb-hint">4</span> or <span data-id="100" class="kb-hint">A</span><span data-id="101" class="kb-hint">B</span><span data-id="102" class="kb-hint">C</span><span data-id="103" class="kb-hint">D</span> to answer · <span data-id="104" class="kb-hint">Enter</span> for next · <span data-id="105" class="kb-hint">S</span> to skip</p>
+      </div>
+    </main>
+  </div>
+
+  <!-- ========== RESULTS SCREEN ========== -->
+  <div data-id="106" id="results-screen" class="screen">
+    <nav data-id="107" class="bg-base-800 border-b border-base-600 px-4 md:px-8 py-3">
+      <div data-id="108" class="flex items-center gap-3">
+        <div data-id="109" class="mil-star" style="width:40px;height:40px;"><i data-id="110" data-lucide="shield" class="w-5 h-5 text-white"></i></div>
+        <span data-id="111" class="text-sm font-bold uppercase text-txt-100 tracking-wide">Test Results</span>
+      </div>
+    </nav>
+
+    <main data-id="112" class="max-w-3xl mx-auto px-4 md:px-8 py-8 md:py-12 fade-in">
+      <!-- Score Circle -->
+      <div data-id="113" class="text-center mb-8">
+        <div data-id="114" class="relative inline-block mb-4">
+          <svg data-id="115" width="180" height="180" viewBox="0 0 180 180">
+            <circle data-id="116" cx="90" cy="90" r="70" fill="none" stroke="#252a3d" stroke-width="12"/>
+            <circle data-id="117" id="score-circle-ring" cx="90" cy="90" r="70" fill="none" stroke="#4a9c59" stroke-width="12" stroke-linecap="round" transform="rotate(-90 90 90)" stroke-dasharray="440" stroke-dashoffset="440" class="score-circle"/>
+          </svg>
+          <div data-id="118" class="absolute inset-0 flex flex-col items-center justify-center">
+            <span data-id="119" id="score-percent" class="text-4xl font-black text-txt-100">0%</span>
+            <span data-id="120" id="score-fraction" class="text-xs text-txt-300">0/0</span>
+          </div>
+        </div>
+        <div data-id="121" id="pass-fail-badge" class="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-bold uppercase tracking-wide">
+          <i data-id="122" data-lucide="check-circle" class="w-5 h-5"></i>
+          <span data-id="123" id="pass-fail-text">PASS</span>
+        </div>
+        <p data-id="124" id="result-message" class="text-sm text-txt-300 mt-3 max-w-md mx-auto"></p>
+      </div>
+
+      <!-- Section Breakdown (for full test) -->
+      <div data-id="125" id="section-breakdown" class="hidden mb-8">
+        <h3 data-id="126" class="text-sm font-bold uppercase tracking-widest text-mil-gold mb-4 flex items-center gap-2">
+          <i data-id="127" data-lucide="bar-chart-3" class="w-4 h-4"></i> Section Breakdown
+        </h3>
+        <div data-id="128" class="overflow-x-auto">
+          <table data-id="129" class="w-full text-sm">
+            <thead data-id="130">
+              <tr data-id="131" class="border-b border-base-600">
+                <th data-id="132" class="text-left py-2 text-txt-400 font-medium">Section</th>
+                <th data-id="133" class="text-center py-2 text-txt-400 font-medium">Score</th>
+                <th data-id="134" class="text-center py-2 text-txt-400 font-medium">%</th>
+                <th data-id="135" class="text-right py-2 text-txt-400 font-medium">Status</th>
+              </tr>
+            </thead>
+            <tbody data-id="136" id="breakdown-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div data-id="137" class="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
+        <button data-id="138" id="retake-btn" class="flex items-center gap-2 text-sm font-bold text-base-900 bg-mil-green hover:bg-mil-greenlt min-h-[44px] px-6 rounded-xl transition-all uppercase tracking-wide w-full sm:w-auto justify-center">
+          <i data-id="139" data-lucide="rotate-ccw" class="w-4 h-4"></i> Retake
+        </button>
+        <button data-id="140" id="home-btn" class="flex items-center gap-2 text-sm font-bold text-txt-100 bg-base-700 hover:bg-base-600 border border-base-600 min-h-[44px] px-6 rounded-xl transition-all uppercase tracking-wide w-full sm:w-auto justify-center">
+          <i data-id="141" data-lucide="home" class="w-4 h-4"></i> Home
+        </button>
+      </div>
+    </main>
+
+    <footer data-id="142" class="py-6 text-center border-t border-base-700 mt-8">
+      <p data-id="143" class="text-xs text-txt-400 mb-1">Made by Copilot</p>
+      <p data-id="144" class="text-[10px] text-txt-400 opacity-60">Powered by ASVAB For Dummies &amp; ASVAB Secrets study guides</p>
+    </footer>
+  </div>
+
+  <script>
+  // ==================== QUESTION BANK ====================
+  const QUESTIONS = {
+    GS: [
+      {id:"gs1",section:"GS",question:"What is the basic unit of life?",choices:["Atom","Cell","Molecule","Tissue"],answer:1,explanation:"Cells are the fundamental structural and functional units of all living organisms."},
+      {id:"gs2",section:"GS",question:"Which planet is third from the sun?",choices:["Venus","Mars","Earth","Mercury"],answer:2,explanation:"Earth is the third planet from the sun in our solar system."},
+      {id:"gs3",section:"GS",question:"What is the chemical formula for water?",choices:["CO₂","H₂O","NaCl","O₂"],answer:1,explanation:"Water is composed of two hydrogen atoms and one oxygen atom."},
+      {id:"gs4",section:"GS",question:"The freezing point of water on the Celsius scale is:",choices:["32°C","100°C","0°C","-273°C"],answer:2,explanation:"Water freezes at 0°C (32°F) at standard atmospheric pressure."},
+      {id:"gs5",section:"GS",question:"Which organelle is known as the \"powerhouse\" of the cell?",choices:["Nucleus","Ribosome","Mitochondria","Vacuole"],answer:2,explanation:"Mitochondria produce ATP energy through cellular respiration."},
+      {id:"gs6",section:"GS",question:"The scientific classification system was developed by:",choices:["Isaac Newton","Charles Darwin","Carl Linnaeus","Gregor Mendel"],answer:2,explanation:"Carl Linnaeus created the binomial nomenclature classification system in 1757."},
+      {id:"gs7",section:"GS",question:"Which layer of the atmosphere is closest to Earth's surface?",choices:["Stratosphere","Mesosphere","Troposphere","Thermosphere"],answer:2,explanation:"The troposphere extends 5–10 miles above Earth and is where weather occurs."},
+      {id:"gs8",section:"GS",question:"What gas do plants absorb during photosynthesis?",choices:["Oxygen","Nitrogen","Carbon Dioxide","Hydrogen"],answer:2,explanation:"Plants absorb CO₂ and water, using sunlight to produce glucose and oxygen."},
+      {id:"gs9",section:"GS",question:"The metric unit of length is the:",choices:["Gram","Liter","Meter","Kelvin"],answer:2,explanation:"The meter is the base unit of length in the metric system."},
+      {id:"gs10",section:"GS",question:"DNA is found primarily in which part of the cell?",choices:["Cell membrane","Cytoplasm","Ribosome","Nucleus"],answer:3,explanation:"DNA is located in the nucleus, which controls cellular activity."},
+      {id:"gs11",section:"GS",question:"Which element has the atomic number 1?",choices:["Helium","Carbon","Hydrogen","Oxygen"],answer:2,explanation:"Hydrogen has one proton in its nucleus, giving it atomic number 1."},
+      {id:"gs12",section:"GS",question:"What is absolute zero on the Kelvin scale?",choices:["0 K","273 K","-459 K","100 K"],answer:0,explanation:"Absolute zero (0 K) is the theoretical minimum temperature where molecular motion stops."},
+      {id:"gs13",section:"GS",question:"A lunar eclipse occurs when:",choices:["The moon is between Earth and the sun","The Earth is between the sun and the moon","The sun is between Earth and the moon","The moon disappears"],answer:1,explanation:"A lunar eclipse happens when Earth's shadow falls on the moon."},
+      {id:"gs14",section:"GS",question:"Which blood type is the universal donor?",choices:["A","B","AB","O"],answer:3,explanation:"Type O negative blood can be donated to patients of any blood type."},
+      {id:"gs15",section:"GS",question:"The scientific method begins with:",choices:["Forming a hypothesis","Conducting an experiment","Observing a phenomenon","Drawing conclusions"],answer:2,explanation:"The first step of the scientific method is observing some aspect of the universe."},
+      {id:"gs16",section:"GS",question:"Which kingdom includes organisms like mushrooms?",choices:["Protista","Monera","Fungi","Animalia"],answer:2,explanation:"Fungi are complex, many-celled organisms that don't photosynthesize."},
+      {id:"gs17",section:"GS",question:"What is the boiling point of water in Fahrenheit?",choices:["100°F","180°F","212°F","32°F"],answer:2,explanation:"Water boils at 212°F (100°C) at sea level."},
+      {id:"gs18",section:"GS",question:"The asteroid belt is located between which two planets?",choices:["Earth and Mars","Mars and Jupiter","Jupiter and Saturn","Saturn and Uranus"],answer:1,explanation:"The asteroid belt lies between Mars and Jupiter."},
+      {id:"gs19",section:"GS",question:"Which process describes the movement of water through a cell membrane?",choices:["Phagocytosis","Osmosis","Photosynthesis","Metabolism"],answer:1,explanation:"Osmosis is the movement of water across a semi-permeable membrane."},
+      {id:"gs20",section:"GS",question:"Carnivores are animals that:",choices:["Eat only plants","Eat plants and animals","Eat only meat","Eat only insects"],answer:2,explanation:"Carnivores exclusively eat meat; examples include lions and tigers."},
+      {id:"gs21",section:"GS",question:"The human body has how many chromosomes in a normal cell?",choices:["23","46","42","48"],answer:1,explanation:"Normal human cells contain 46 chromosomes (23 pairs)."},
+      {id:"gs22",section:"GS",question:"A fault is:",choices:["A mountain","A crack in the Earth's crust","A type of cloud","An ocean current"],answer:1,explanation:"Faults are cracks in the Earth's crust along which earthquakes occur."},
+      {id:"gs23",section:"GS",question:"Cumulus clouds are characterized by:",choices:["Thin and feathery appearance","Flat bottoms and round tops","Broad and low appearance","Dark and stormy layers"],answer:1,explanation:"Cumulus clouds have flat bottoms and round tops and indicate fair weather."},
+      {id:"gs24",section:"GS",question:"The sex of a human child is determined by:",choices:["The mother's chromosome","The father's chromosome","Both parents equally","Random selection"],answer:1,explanation:"The father contributes either an X or Y chromosome, determining the child's sex."},
+      {id:"gs25",section:"GS",question:"Which planet has the most famous ring system?",choices:["Jupiter","Uranus","Neptune","Saturn"],answer:3,explanation:"Saturn's rings are the most prominent and well-known in the solar system."}
+    ],
+    AR: [
+      {id:"ar1",section:"AR",question:"If apples cost $3 for 15, what is the cost of one apple?",choices:["$0.50","$0.25","$0.20","$0.30"],answer:2,explanation:"Divide $3 by 15 = $0.20 per apple."},
+      {id:"ar2",section:"AR",question:"A soldier runs 26 miles in 4 hours. What is his average speed?",choices:["5.5 mph","6 mph","6.5 mph","7 mph"],answer:2,explanation:"26 ÷ 4 = 6.5 miles per hour."},
+      {id:"ar3",section:"AR",question:"A 15% tip on a $60 meal equals:",choices:["$6.00","$9.00","$12.00","$7.50"],answer:1,explanation:"0.15 × $60 = $9.00."},
+      {id:"ar4",section:"AR",question:"A map scale shows 1 inch = 50 miles. Two cities are 3.5 inches apart. What is the actual distance?",choices:["150 miles","175 miles","125 miles","200 miles"],answer:1,explanation:"3.5 × 50 = 175 miles."},
+      {id:"ar5",section:"AR",question:"If a square sandbox is 5 feet on each side and 1 foot deep, how many cubic feet of sand are needed?",choices:["15","20","25","30"],answer:2,explanation:"5 × 5 × 1 = 25 cubic feet."},
+      {id:"ar6",section:"AR",question:"A recruit earns $2,400 per month. After a 10% raise, what is the new monthly pay?",choices:["$2,500","$2,600","$2,640","$2,580"],answer:2,explanation:"$2,400 × 1.10 = $2,640."},
+      {id:"ar7",section:"AR",question:"Six pizzas are pepperoni, 7 hamburger, 4 cheese, and 3 \"everything.\" What is the probability of randomly selecting a pepperoni pizza?",choices:["1/2","3/10","2/5","1/4"],answer:1,explanation:"6 out of 20 total = 6/20 = 3/10."},
+      {id:"ar8",section:"AR",question:"A soldier has 3/4 of a canteen of water. After drinking 1/4 of what he has, how much is left?",choices:["1/2","3/16","9/16","5/8"],answer:2,explanation:"3/4 × 3/4 = 9/16 remaining."},
+      {id:"ar9",section:"AR",question:"What is the next number in the series: 4, 8, 16, 32, ___?",choices:["48","56","64","72"],answer:2,explanation:"Each number doubles: 32 × 2 = 64."},
+      {id:"ar10",section:"AR",question:"A 320-acre farm sells at $3,000/acre. The buyer purchases $96,000 worth. What fraction of the farm did the buyer get?",choices:["1/4","1/10","1/5","2/3"],answer:1,explanation:"$96,000 ÷ $3,000 = 32 acres; 32/320 = 1/10."},
+      {id:"ar11",section:"AR",question:"Two partners split profits in a 3:2 ratio. On $150,000 in profits, the smaller partner receives:",choices:["$50,000","$30,000","$60,000","$90,000"],answer:2,explanation:"2/5 × $150,000 = $60,000."},
+      {id:"ar12",section:"AR",question:"Mailing the first ounce costs $0.39 and each additional ounce costs $0.24. How much does a 5-ounce letter cost?",choices:["$1.85","$1.16","$1.45","$1.35"],answer:3,explanation:"$0.39 + (4 × $0.24) = $0.39 + $0.96 = $1.35."},
+      {id:"ar13",section:"AR",question:"A thermometer drops from 42°F to -8°F. By how many degrees did it drop?",choices:["34","42","50","38"],answer:2,explanation:"42 – (-8) = 42 + 8 = 50 degrees."},
+      {id:"ar14",section:"AR",question:"If a car travels 300 miles in 5 hours, how long will it take to travel 450 miles at the same speed?",choices:["6.5 hours","7 hours","7.5 hours","8 hours"],answer:2,explanation:"Speed = 60 mph; 450 ÷ 60 = 7.5 hours."},
+      {id:"ar15",section:"AR",question:"A 15-foot ladder leans against a wall. If the base is 9 feet from the wall, how high up the wall does the ladder reach?",choices:["10 feet","11 feet","12 feet","13 feet"],answer:2,explanation:"Pythagorean theorem: √(15²−9²) = √(225−81) = √144 = 12 feet."},
+      {id:"ar16",section:"AR",question:"A soldier uses 1/4 of his time sleeping, 1/6 exercising, and 2/5 working. What fraction of the day is free time?",choices:["5/60","7/60","11/60","1/12"],answer:2,explanation:"Common denominator 60: 15+10+24 = 49/60; free = 11/60."},
+      {id:"ar17",section:"AR",question:"A 12% sales tax on a $450 item equals how much total cost?",choices:["$496","$502","$504","$508"],answer:2,explanation:"$450 × 1.12 = $504."},
+      {id:"ar18",section:"AR",question:"If 3 workers can complete a job in 12 days, how many days will 4 workers take?",choices:["7","8","9","10"],answer:2,explanation:"Total work = 36 worker-days; 36 ÷ 4 = 9 days."},
+      {id:"ar19",section:"AR",question:"A rectangular room is 18 feet by 12 feet. How many square yards of carpet are needed?",choices:["18 sq yd","24 sq yd","216 sq yd","36 sq yd"],answer:1,explanation:"18 × 12 = 216 sq ft; ÷ 9 = 24 square yards."},
+      {id:"ar20",section:"AR",question:"Train A travels at 60 mph and Train B at 80 mph in opposite directions. How far apart are they after 2.5 hours?",choices:["300 miles","350 miles","400 miles","450 miles"],answer:1,explanation:"(60 + 80) × 2.5 = 140 × 2.5 = 350 miles."},
+      {id:"ar21",section:"AR",question:"A store marks up items 40% above cost. If cost is $75, what is the selling price?",choices:["$100","$105","$115","$110"],answer:1,explanation:"$75 × 1.40 = $105."},
+      {id:"ar22",section:"AR",question:"What is 2% of 500?",choices:["5","10","25","50"],answer:1,explanation:"0.02 × 500 = 10."},
+      {id:"ar23",section:"AR",question:"In the military, a platoon has 42 soldiers divided into 6 equal squads. How many in each squad?",choices:["5","6","7","8"],answer:2,explanation:"42 ÷ 6 = 7 soldiers per squad."},
+      {id:"ar24",section:"AR",question:"A recruit burns 450 calories per hour running. After 45 minutes of running, how many calories were burned?",choices:["300","325","337","375"],answer:2,explanation:"450 × 0.75 = 337.5 ≈ 337."},
+      {id:"ar25",section:"AR",question:"If 5 items cost $12.50, what do 8 items cost?",choices:["$18.00","$20.00","$22.50","$25.00"],answer:1,explanation:"$12.50 ÷ 5 = $2.50 each; × 8 = $20.00."},
+      {id:"ar26",section:"AR",question:"A contractor estimates a job takes 80 hours. After completing 35%, how many hours remain?",choices:["28","42","48","52"],answer:3,explanation:"80 × 0.65 = 52 hours remain."},
+      {id:"ar27",section:"AR",question:"Water flows into a tank at 15 gallons per minute. How long to fill a 600-gallon tank?",choices:["30 min","35 min","40 min","45 min"],answer:2,explanation:"600 ÷ 15 = 40 minutes."},
+      {id:"ar28",section:"AR",question:"A soldier's base pay is $3,200/month plus $400 housing allowance. Annual income equals:",choices:["$40,800","$43,200","$38,400","$42,400"],answer:1,explanation:"($3,200 + $400) × 12 = $3,600 × 12 = $43,200."},
+      {id:"ar29",section:"AR",question:"A triangle has sides of 9, 10, and 11 feet. What is its perimeter?",choices:["20","25","30","35"],answer:2,explanation:"9 + 10 + 11 = 30 feet."},
+      {id:"ar30",section:"AR",question:"Ticket prices increased 25% from $80 last year. New price:",choices:["$95","$100","$105","$110"],answer:1,explanation:"$80 × 1.25 = $100."}
+    ],
+    WK: [
+      {id:"wk1",section:"WK",question:"DESOLATE most nearly means:",choices:["Cheerful","Creepy","Forlorn","Excited"],answer:2,explanation:"Desolate means deserted or bleak, closest to forlorn."},
+      {id:"wk2",section:"WK",question:"LACONIC most nearly means:",choices:["Wordy","Talkative","Expressive","Brief"],answer:3,explanation:"Laconic means brief and concise in speech."},
+      {id:"wk3",section:"WK",question:"TENACIOUS most nearly means:",choices:["Weak","Persistent","Flexible","Quiet"],answer:1,explanation:"Tenacious means holding firmly; persistent."},
+      {id:"wk4",section:"WK",question:"PRUDENT most nearly means:",choices:["Reckless","Wise","Lazy","Angry"],answer:1,explanation:"Prudent means showing good judgment; wise and careful."},
+      {id:"wk5",section:"WK",question:"AMBIGUOUS most nearly means:",choices:["Clear","Certain","Unclear","Direct"],answer:2,explanation:"Ambiguous means open to more than one interpretation; unclear."},
+      {id:"wk6",section:"WK",question:"BENEVOLENT most nearly means:",choices:["Cruel","Kind","Selfish","Indifferent"],answer:1,explanation:"Benevolent means well-meaning and kindly."},
+      {id:"wk7",section:"WK",question:"DILIGENT most nearly means:",choices:["Lazy","Careful","Hardworking","Slow"],answer:2,explanation:"Diligent means having steady, earnest effort; hardworking."},
+      {id:"wk8",section:"WK",question:"OBSOLETE most nearly means:",choices:["Modern","New","Outdated","Useful"],answer:2,explanation:"Obsolete means no longer produced or used; outdated."},
+      {id:"wk9",section:"WK",question:"METICULOUS most nearly means:",choices:["Careless","Careful","Messy","Reckless"],answer:1,explanation:"Meticulous means showing great attention to detail; very careful."},
+      {id:"wk10",section:"WK",question:"CONCEDE most nearly means:",choices:["Argue","Admit","Deny","Resist"],answer:1,explanation:"Concede means acknowledge or admit something reluctantly."},
+      {id:"wk11",section:"WK",question:"ELOQUENT most nearly means:",choices:["Silent","Confusing","Articulate","Timid"],answer:2,explanation:"Eloquent means fluent and persuasive in speaking or writing."},
+      {id:"wk12",section:"WK",question:"FRUGAL most nearly means:",choices:["Wasteful","Generous","Thrifty","Wealthy"],answer:2,explanation:"Frugal means sparing and economical; thrifty."},
+      {id:"wk13",section:"WK",question:"ASTUTE most nearly means:",choices:["Foolish","Clever","Honest","Brave"],answer:1,explanation:"Astute means having a sharp ability to understand; clever."},
+      {id:"wk14",section:"WK",question:"HINDER most nearly means:",choices:["Assist","Follow","Obstruct","Lead"],answer:2,explanation:"Hinder means create difficulties, make it harder to advance; obstruct."},
+      {id:"wk15",section:"WK",question:"The soldier was RELUCTANT to share his supplies.",choices:["Eager","Unwilling","Happy","Ready"],answer:1,explanation:"Reluctant means unwilling or not eager."},
+      {id:"wk16",section:"WK",question:"FORTITUDE most nearly means:",choices:["Cowardice","Courage","Weakness","Anger"],answer:1,explanation:"Fortitude means courage in pain or adversity; bravery."},
+      {id:"wk17",section:"WK",question:"COVERT most nearly means:",choices:["Open","Obvious","Hidden","Loud"],answer:2,explanation:"Covert means not openly acknowledged or displayed; hidden."},
+      {id:"wk18",section:"WK",question:"VERSATILE most nearly means:",choices:["Rigid","Limited","Adaptable","Useless"],answer:2,explanation:"Versatile means able to adapt or be adapted to many functions; adaptable."},
+      {id:"wk19",section:"WK",question:"HOSTILE most nearly means:",choices:["Friendly","Unfriendly","Calm","Happy"],answer:1,explanation:"Hostile means showing opposition or dislike; unfriendly."},
+      {id:"wk20",section:"WK",question:"ERRATIC most nearly means:",choices:["Predictable","Consistent","Irregular","Steady"],answer:2,explanation:"Erratic means not even or regular in pattern; irregular."},
+      {id:"wk21",section:"WK",question:"CANDID most nearly means:",choices:["Dishonest","Frank","Secretive","Timid"],answer:1,explanation:"Candid means truthful and straightforward; frank."},
+      {id:"wk22",section:"WK",question:"MOMENTUM most nearly means:",choices:["Stillness","Force","Weakness","Direction"],answer:1,explanation:"Momentum is the quantity of motion; driving force."},
+      {id:"wk23",section:"WK",question:"VALIDATE most nearly means:",choices:["Disprove","Confirm","Ignore","Reject"],answer:1,explanation:"Validate means to check or prove the accuracy or truth; confirm."},
+      {id:"wk24",section:"WK",question:"SYSTEMATIC most nearly means:",choices:["Random","Methodical","Chaotic","Quick"],answer:1,explanation:"Systematic means done according to a plan; methodical."},
+      {id:"wk25",section:"WK",question:"TACTICAL most nearly means:",choices:["Clumsy","Strategic","Accidental","Emotional"],answer:1,explanation:"Tactical means relating to organized actions to achieve a goal; strategic."},
+      {id:"wk26",section:"WK",question:"INITIATIVE most nearly means:",choices:["Hesitation","Leadership","Followership","Delay"],answer:1,explanation:"Initiative means the ability to assess and take action; proactive leadership."},
+      {id:"wk27",section:"WK",question:"RIGOROUS most nearly means:",choices:["Easy","Strict","Flexible","Gentle"],answer:1,explanation:"Rigorous means extremely thorough, exhaustive, or accurate; strict."},
+      {id:"wk28",section:"WK",question:"OMINOUS most nearly means:",choices:["Threatening","Cheerful","Welcoming","Safe"],answer:0,explanation:"Ominous gives the impression that something bad is imminent; threatening."},
+      {id:"wk29",section:"WK",question:"RESILIENT most nearly means:",choices:["Fragile","Weak","Tough","Sensitive"],answer:2,explanation:"Resilient means able to recover quickly from difficulties; tough."},
+      {id:"wk30",section:"WK",question:"CRUCIAL most nearly means:",choices:["Unimportant","Optional","Essential","Extra"],answer:2,explanation:"Crucial means decisive or critical; essential."},
+      {id:"wk31",section:"WK",question:"AGILE most nearly means:",choices:["Slow","Heavy","Nimble","Rigid"],answer:2,explanation:"Agile means able to move quickly and easily; nimble."},
+      {id:"wk32",section:"WK",question:"EXECUTE most nearly means:",choices:["Plan","Carry out","Delay","Consider"],answer:1,explanation:"Execute means put a plan or order into effect; carry out."},
+      {id:"wk33",section:"WK",question:"HIERARCHY most nearly means:",choices:["Equality","Ranking","Democracy","Chaos"],answer:1,explanation:"Hierarchy means a system of ranking based on authority or status."},
+      {id:"wk34",section:"WK",question:"MANDATE most nearly means:",choices:["Request","Suggestion","Order","Opinion"],answer:2,explanation:"Mandate means an official order or commission to do something."},
+      {id:"wk35",section:"WK",question:"PROTOCOL most nearly means:",choices:["Improvisation","Procedure","Disorder","Opinion"],answer:1,explanation:"Protocol means an official procedure or system of rules; standard procedure."}
+    ],
+    PC: [
+      {id:"pc1",section:"PC",question:"How many main branches does the U.S. military have?",choices:["3","4","5","6"],answer:2,explanation:"The passage states five main branches.",passage:"The United States military consists of five main branches: the Army, Navy, Air Force, Marine Corps, and Coast Guard. Each branch has a distinct mission and set of responsibilities. The Army focuses on land-based operations. The Navy operates at sea and from the sea. The Air Force provides global aerospace power. The Marine Corps specializes in amphibious operations. The Coast Guard protects maritime law enforcement and search and rescue."},
+      {id:"pc2",section:"PC",question:"Which branch specializes in amphibious operations?",choices:["Army","Navy","Air Force","Marine Corps"],answer:3,explanation:"The passage explicitly states the Marine Corps specializes in amphibious operations.",passage:"The United States military consists of five main branches: the Army, Navy, Air Force, Marine Corps, and Coast Guard. Each branch has a distinct mission and set of responsibilities. The Army focuses on land-based operations. The Navy operates at sea and from the sea. The Air Force provides global aerospace power. The Marine Corps specializes in amphibious operations. The Coast Guard protects maritime law enforcement and search and rescue."},
+      {id:"pc3",section:"PC",question:"The main idea of this passage is:",choices:["The Army is the most important branch","The U.S. military has five branches with distinct roles","The Coast Guard is responsible for sea operations","The Air Force is the largest branch"],answer:1,explanation:"The passage describes all five branches and their roles.",passage:"The United States military consists of five main branches: the Army, Navy, Air Force, Marine Corps, and Coast Guard. Each branch has a distinct mission and set of responsibilities. The Army focuses on land-based operations. The Navy operates at sea and from the sea. The Air Force provides global aerospace power. The Marine Corps specializes in amphibious operations. The Coast Guard protects maritime law enforcement and search and rescue."},
+      {id:"pc4",section:"PC",question:"What does the APFT measure?",choices:["Strength only","Push-ups, sit-ups, and a 2-mile run","Swimming and running","Agility and reaction time"],answer:1,explanation:"The passage states APFT measures push-ups, sit-ups, and a 2-mile run.",passage:"Physical fitness is a critical component of military readiness. Soldiers must maintain strength, endurance, and agility to perform their duties effectively. The Army Physical Fitness Test (APFT) measures push-ups, sit-ups, and a 2-mile run. Recruits who fail to meet minimum standards may be required to attend remedial physical training or face separation from service."},
+      {id:"pc5",section:"PC",question:"What may happen to recruits who fail physical standards?",choices:["They get a second chance only","Nothing happens","They may attend remedial training or face separation","They are transferred to desk jobs"],answer:2,explanation:"The passage states they may attend remedial PT or face separation.",passage:"Physical fitness is a critical component of military readiness. Soldiers must maintain strength, endurance, and agility to perform their duties effectively. The Army Physical Fitness Test (APFT) measures push-ups, sit-ups, and a 2-mile run. Recruits who fail to meet minimum standards may be required to attend remedial physical training or face separation from service."},
+      {id:"pc6",section:"PC",question:"As used in the passage, the word \"remedial\" most likely means:",choices:["Advanced","Corrective","Optional","Punishment"],answer:1,explanation:"Remedial refers to training designed to correct a deficiency; corrective.",passage:"Physical fitness is a critical component of military readiness. Soldiers must maintain strength, endurance, and agility to perform their duties effectively. The Army Physical Fitness Test (APFT) measures push-ups, sit-ups, and a 2-mile run. Recruits who fail to meet minimum standards may be required to attend remedial physical training or face separation from service."},
+      {id:"pc7",section:"PC",question:"What is the main point of this passage?",choices:["GPS is always reliable","Traditional navigation skills are still important","Maps are outdated","Celestial navigation is the best method"],answer:1,explanation:"The passage argues that despite GPS, traditional navigation skills remain essential.",passage:"Navigation is the art and science of determining position and planning routes. Modern military navigation uses GPS satellites, but traditional methods such as map reading and compass use remain essential skills. A soldier who loses their GPS device must be able to navigate by terrain association, dead reckoning, and celestial navigation. These backup skills can mean the difference between mission success and failure."},
+      {id:"pc8",section:"PC",question:"Dead reckoning is described as:",choices:["Using stars to navigate","A GPS technique","A traditional navigation method","Only used in water navigation"],answer:2,explanation:"Dead reckoning is listed as one of the traditional navigation backup methods.",passage:"Navigation is the art and science of determining position and planning routes. Modern military navigation uses GPS satellites, but traditional methods such as map reading and compass use remain essential skills. A soldier who loses their GPS device must be able to navigate by terrain association, dead reckoning, and celestial navigation. These backup skills can mean the difference between mission success and failure."},
+      {id:"pc9",section:"PC",question:"Which of the following can be inferred from the passage?",choices:["Soldiers never lose their GPS devices","GPS is completely unreliable","Military navigation training likely includes both GPS and traditional methods","Compass use is no longer taught"],answer:2,explanation:"The passage implies both GPS and traditional methods are needed, suggesting both are taught.",passage:"Navigation is the art and science of determining position and planning routes. Modern military navigation uses GPS satellites, but traditional methods such as map reading and compass use remain essential skills. A soldier who loses their GPS device must be able to navigate by terrain association, dead reckoning, and celestial navigation. These backup skills can mean the difference between mission success and failure."},
+      {id:"pc10",section:"PC",question:"According to the passage, what is leadership?",choices:["Only about rank","A responsibility","Only learned in school","Limited to officers"],answer:1,explanation:"The passage states leadership is a responsibility, not just a rank.",passage:"Leadership is not merely a rank or title; it is a responsibility. Effective military leaders share several key qualities: they communicate clearly, set the example through their own behavior, take care of their subordinates, and make decisive decisions under pressure. Leadership is learned through experience, mentorship, and continued education. Even the most junior enlisted soldier can demonstrate leadership qualities."},
+      {id:"pc11",section:"PC",question:"Which of the following is NOT listed as a quality of effective military leaders?",choices:["Clear communication","Physical strength","Setting an example","Decisive decision-making"],answer:1,explanation:"Physical strength is not mentioned as a leadership quality in this passage.",passage:"Leadership is not merely a rank or title; it is a responsibility. Effective military leaders share several key qualities: they communicate clearly, set the example through their own behavior, take care of their subordinates, and make decisive decisions under pressure. Leadership is learned through experience, mentorship, and continued education. Even the most junior enlisted soldier can demonstrate leadership qualities."},
+      {id:"pc12",section:"PC",question:"The word \"subordinates\" as used in the passage most likely means:",choices:["Commanding officers","Civilian employees","Soldiers of lower rank","Enemies"],answer:2,explanation:"Subordinates are those of lower rank who report to a leader.",passage:"Leadership is not merely a rank or title; it is a responsibility. Effective military leaders share several key qualities: they communicate clearly, set the example through their own behavior, take care of their subordinates, and make decisive decisions under pressure. Leadership is learned through experience, mentorship, and continued education. Even the most junior enlisted soldier can demonstrate leadership qualities."},
+      {id:"pc13",section:"PC",question:"What determines eligibility for military service?",choices:["The total ASVAB score","Only the math sections","The AFQT score","The Word Knowledge score alone"],answer:2,explanation:"The passage states the AFQT score determines enlistment qualification.",passage:"The ASVAB, or Armed Services Vocational Aptitude Battery, is a timed, multiple-choice test. The four subtests that make up the Armed Forces Qualification Test (AFQT) are Word Knowledge, Paragraph Comprehension, Arithmetic Reasoning, and Mathematics Knowledge. The AFQT score determines whether a candidate qualifies for military service. Scores above 31 are generally required for enlistment, though requirements vary by branch."},
+      {id:"pc14",section:"PC",question:"How many subtests make up the AFQT?",choices:["2","3","4","9"],answer:2,explanation:"The passage lists four subtests: WK, PC, AR, and MK.",passage:"The ASVAB, or Armed Services Vocational Aptitude Battery, is a timed, multiple-choice test. The four subtests that make up the Armed Forces Qualification Test (AFQT) are Word Knowledge, Paragraph Comprehension, Arithmetic Reasoning, and Mathematics Knowledge. The AFQT score determines whether a candidate qualifies for military service. Scores above 31 are generally required for enlistment, though requirements vary by branch."},
+      {id:"pc15",section:"PC",question:"Which statement is best supported by the passage?",choices:["All branches require the same minimum AFQT score","A score of 31 guarantees enlistment in any branch","The ASVAB is a timed test with multiple-choice questions","Only math skills matter on the ASVAB"],answer:2,explanation:"The passage explicitly describes the ASVAB as 'a timed, multiple-choice test.'",passage:"The ASVAB, or Armed Services Vocational Aptitude Battery, is a timed, multiple-choice test. The four subtests that make up the Armed Forces Qualification Test (AFQT) are Word Knowledge, Paragraph Comprehension, Arithmetic Reasoning, and Mathematics Knowledge. The AFQT score determines whether a candidate qualifies for military service. Scores above 31 are generally required for enlistment, though requirements vary by branch."}
+    ],
+    MK: [
+      {id:"mk1",section:"MK",question:"Solve for x: 2x + 3 = 13",choices:["4","5","6","7"],answer:1,explanation:"2x = 10; x = 5."},
+      {id:"mk2",section:"MK",question:"What is the area of a circle with radius 7?",choices:["49π","14π","7π","21π"],answer:0,explanation:"A = πr² = π × 49 = 49π."},
+      {id:"mk3",section:"MK",question:"Simplify: x³ × x²",choices:["x⁵","x⁶","x¹","2x⁵"],answer:0,explanation:"When multiplying same bases, add exponents: 3 + 2 = 5."},
+      {id:"mk4",section:"MK",question:"What is the square root of 144?",choices:["11","12","13","14"],answer:1,explanation:"12 × 12 = 144."},
+      {id:"mk5",section:"MK",question:"A rectangle has length 8 and width 5. What is its area?",choices:["26","13","40","35"],answer:2,explanation:"Area = length × width = 8 × 5 = 40."},
+      {id:"mk6",section:"MK",question:"Solve: 3x + 3 = 9 + x",choices:["x = 1","x = 2","x = 3","x = 4"],answer:2,explanation:"2x = 6; x = 3."},
+      {id:"mk7",section:"MK",question:"Express 0.0005 in scientific notation:",choices:["5 × 10⁻⁴","5 × 10⁻³","5 × 10⁻⁵","5 × 10⁴"],answer:0,explanation:"The decimal point moves 4 places right; exponent is negative: 5 × 10⁻⁴."},
+      {id:"mk8",section:"MK",question:"What is the hypotenuse of a right triangle with legs of 3 and 4?",choices:["5","6","7","8"],answer:0,explanation:"Pythagorean theorem: 3² + 4² = 9 + 16 = 25; √25 = 5."},
+      {id:"mk9",section:"MK",question:"Factor: x² − 5x + 6",choices:["(x+2)(x+3)","(x−2)(x−3)","(x−1)(x−6)","(x+1)(x−6)"],answer:1,explanation:"Factors of 6 that add to −5: −2 and −3; (x−2)(x−3)."},
+      {id:"mk10",section:"MK",question:"What is 25% of 80?",choices:["15","20","25","30"],answer:1,explanation:"0.25 × 80 = 20."},
+      {id:"mk11",section:"MK",question:"A right angle measures:",choices:["45°","90°","180°","360°"],answer:1,explanation:"A right angle is exactly 90 degrees."},
+      {id:"mk12",section:"MK",question:"Solve: −6x = 36",choices:["x = 6","x = −6","x = −4","x = 4"],answer:1,explanation:"x = 36 ÷ −6 = −6."},
+      {id:"mk13",section:"MK",question:"The prime factorization of 60 is:",choices:["2 × 3 × 5","2² × 3 × 5","2 × 3² × 5","2³ × 5"],answer:1,explanation:"60 = 4 × 15 = 2² × 3 × 5."},
+      {id:"mk14",section:"MK",question:"An equilateral triangle has angles of:",choices:["30°","45°","60°","90°"],answer:2,explanation:"All three angles of an equilateral triangle equal 60°."},
+      {id:"mk15",section:"MK",question:"What is the volume of a box that is 4 × 3 × 2 feet?",choices:["12","18","24","30"],answer:2,explanation:"V = l × w × h = 4 × 3 × 2 = 24 cubic feet."},
+      {id:"mk16",section:"MK",question:"If x² = 81, what is x?",choices:["±7","±8","±9","±10"],answer:2,explanation:"√81 = 9; x = ±9."},
+      {id:"mk17",section:"MK",question:"Solve the inequality: x + 5 > 12",choices:["x > 5","x > 7","x > 12","x < 7"],answer:1,explanation:"x > 12 − 5 = 7."},
+      {id:"mk18",section:"MK",question:"What is 2³ × 2⁴?",choices:["2⁷","2¹²","4⁷","2¹"],answer:0,explanation:"Add exponents: 3 + 4 = 7; answer is 2⁷."},
+      {id:"mk19",section:"MK",question:"The circumference of a circle with diameter 10 is approximately:",choices:["62.8","31.4","15.7","78.5"],answer:1,explanation:"C = πd = 3.14 × 10 = 31.4."},
+      {id:"mk20",section:"MK",question:"Simplify: (x³)²",choices:["x⁵","x⁶","x⁹","2x³"],answer:1,explanation:"When raising an exponent to a power, multiply: 3 × 2 = 6."},
+      {id:"mk21",section:"MK",question:"What is the product of √36 and √49?",choices:["13","42","1764","85"],answer:1,explanation:"√36 = 6; √49 = 7; 6 × 7 = 42."},
+      {id:"mk22",section:"MK",question:"In a right triangle, the side opposite the right angle is called the:",choices:["Leg","Base","Hypotenuse","Height"],answer:2,explanation:"The hypotenuse is always opposite the right angle and is the longest side."},
+      {id:"mk23",section:"MK",question:"Solve: 1/4 × 2/3 =",choices:["3/4","1/4","1/6","1/3"],answer:2,explanation:"1/4 × 2/3 = 2/12 = 1/6."},
+      {id:"mk24",section:"MK",question:"What is the largest of these fractions: 2/3, 5/8, 11/16, 3/4?",choices:["2/3","5/8","11/16","3/4"],answer:3,explanation:"Convert to 48ths: 32, 30, 33, 36 — 3/4 = 36/48 is largest."},
+      {id:"mk25",section:"MK",question:"A cylinder has radius 3 and height 10. What is its volume?",choices:["90π","30π","9π","60π"],answer:0,explanation:"V = πr²h = π × 9 × 10 = 90π."}
+    ],
+    EI: [
+      {id:"ei1",section:"EI",question:"Electrical current is measured in:",choices:["Volts","Ohms","Amperes","Watts"],answer:2,explanation:"Current (flow of electrons) is measured in amperes (amps)."},
+      {id:"ei2",section:"EI",question:"Voltage (electrical pressure) is measured in:",choices:["Amperes","Volts","Watts","Ohms"],answer:1,explanation:"Voltage, or electrical pressure, is measured in volts."},
+      {id:"ei3",section:"EI",question:"Resistance in an electrical circuit is measured in:",choices:["Amperes","Volts","Watts","Ohms"],answer:3,explanation:"Resistance to electrical flow is measured in ohms."},
+      {id:"ei4",section:"EI",question:"Ohm's Law states that V = I × R. If voltage = 12V and resistance = 4Ω, current equals:",choices:["48A","3A","8A","16A"],answer:1,explanation:"I = V/R = 12/4 = 3 amperes."},
+      {id:"ei5",section:"EI",question:"Electrical power is measured in:",choices:["Ohms","Volts","Watts","Amperes"],answer:2,explanation:"Electrical power is measured in watts (P = V × I)."},
+      {id:"ei6",section:"EI",question:"In a series circuit, resistors are connected:",choices:["In parallel loops","End to end in a single path","With no connection","In separate branches"],answer:1,explanation:"Series circuits connect components end to end in a single path."},
+      {id:"ei7",section:"EI",question:"In a parallel circuit, if one bulb burns out:",choices:["All bulbs go out","Only that bulb goes out","The circuit shorts","Voltage increases"],answer:1,explanation:"Parallel circuits give each component its own path, so others stay on."},
+      {id:"ei8",section:"EI",question:"A transistor is primarily used as:",choices:["A source of voltage","An amplifier or switch","A power supply","A resistor"],answer:1,explanation:"Transistors act as amplifiers or electronic switches in circuits."},
+      {id:"ei9",section:"EI",question:"AC stands for:",choices:["Alternating Current","Active Circuit","Amplified Current","Analog Control"],answer:0,explanation:"AC (Alternating Current) changes direction periodically."},
+      {id:"ei10",section:"EI",question:"DC stands for:",choices:["Digital Circuit","Directional Current","Direct Current","Dual Conductor"],answer:2,explanation:"DC (Direct Current) flows in one direction continuously."},
+      {id:"ei11",section:"EI",question:"A fuse in a circuit is designed to:",choices:["Increase current","Store energy","Break the circuit if current is too high","Reduce voltage"],answer:2,explanation:"Fuses protect circuits by breaking (burning out) when current exceeds safe levels."},
+      {id:"ei12",section:"EI",question:"Which symbol represents a resistor in a circuit diagram?",choices:["A circle","A zigzag line","A straight line","A triangle"],answer:1,explanation:"Resistors are represented by a zigzag line in circuit diagrams."},
+      {id:"ei13",section:"EI",question:"A diode allows current to flow:",choices:["In both directions","In one direction only","Only when voltage is zero","Only with AC power"],answer:1,explanation:"Diodes are one-way valves for electric current."},
+      {id:"ei14",section:"EI",question:"A capacitor in a circuit is used to:",choices:["Resist current","Amplify signals","Store electrical charge","Convert AC to DC"],answer:2,explanation:"Capacitors store electrical energy in an electric field."},
+      {id:"ei15",section:"EI",question:"The unit of electrical frequency is:",choices:["Hertz","Ohms","Farads","Henrys"],answer:0,explanation:"Frequency (cycles per second) is measured in hertz (Hz)."},
+      {id:"ei16",section:"EI",question:"If P = 60W and V = 12V, what is the current?",choices:["720A","72A","5A","0.2A"],answer:2,explanation:"I = P/V = 60/12 = 5 amperes."},
+      {id:"ei17",section:"EI",question:"A transformer is used to:",choices:["Store electricity","Change AC voltage levels","Generate electricity","Measure resistance"],answer:1,explanation:"Transformers step voltage up or down using electromagnetic induction."},
+      {id:"ei18",section:"EI",question:"Short circuits are dangerous because they cause:",choices:["Low current","Very high current","Reverse current","Zero voltage"],answer:1,explanation:"Short circuits create a path of near-zero resistance, causing dangerously high current."},
+      {id:"ei19",section:"EI",question:"The positive terminal of a battery is marked with:",choices:["A minus sign","A plus sign","The letter N","The letter G"],answer:1,explanation:"The positive terminal is marked with a plus (+) sign."},
+      {id:"ei20",section:"EI",question:"Electrons flow from:",choices:["Positive to negative","Negative to positive","High resistance to low","Ground to power"],answer:1,explanation:"Electrons (negative charges) flow from negative to positive terminals."}
+    ],
+    AS: [
+      {id:"as1",section:"AS",question:"The function of the radiator in a car is to:",choices:["Generate power","Cool the engine","Lubricate the engine","Filter the air"],answer:1,explanation:"The radiator dissipates heat from the engine cooling system."},
+      {id:"as2",section:"AS",question:"What does the alternator do?",choices:["Starts the engine","Generates electricity while the engine runs","Controls the fuel","Powers the brakes"],answer:1,explanation:"The alternator charges the battery and powers electrical systems while running."},
+      {id:"as3",section:"AS",question:"A Phillips-head screwdriver has a:",choices:["Flat blade","Star-shaped tip","Hex tip","Round tip"],answer:1,explanation:"Phillips screwdrivers have a cross/star-shaped tip."},
+      {id:"as4",section:"AS",question:"What tool is used to measure the torque applied to a fastener?",choices:["Caliper","Torque wrench","Socket wrench","Impact driver"],answer:1,explanation:"A torque wrench measures and limits the tightening force on bolts."},
+      {id:"as5",section:"AS",question:"Which type of saw is best for cutting curves in wood?",choices:["Crosscut saw","Hacksaw","Jigsaw","Rip saw"],answer:2,explanation:"Jigsaws are designed to cut curves and irregular shapes."},
+      {id:"as6",section:"AS",question:"The brake system in a modern car typically uses:",choices:["Air pressure","Hydraulic fluid","Mechanical cables only","Electric motors"],answer:1,explanation:"Modern car brakes use hydraulic fluid to transmit braking force."},
+      {id:"as7",section:"AS",question:"What is the purpose of the catalytic converter?",choices:["Increase horsepower","Reduce exhaust emissions","Improve gas mileage","Cool the exhaust"],answer:1,explanation:"Catalytic converters reduce harmful emissions from exhaust gases."},
+      {id:"as8",section:"AS",question:"A micrometer is used to measure:",choices:["Angles","Torque","Very small distances","Electrical resistance"],answer:2,explanation:"Micrometers measure very small distances with high precision."},
+      {id:"as9",section:"AS",question:"Pliers are classified as:",choices:["Cutting tools","Fastening tools","Gripping/clamping tools","Measuring tools"],answer:2,explanation:"Pliers grip and hold objects; they are gripping/clamping tools."},
+      {id:"as10",section:"AS",question:"Which fluid is used in a car's power steering system?",choices:["Engine oil","Brake fluid","Power steering fluid","Coolant"],answer:2,explanation:"Power steering systems use dedicated power steering fluid."},
+      {id:"as11",section:"AS",question:"A torque converter is part of which system?",choices:["Cooling system","Brake system","Automatic transmission","Fuel system"],answer:2,explanation:"A torque converter transfers engine power to the automatic transmission."},
+      {id:"as12",section:"AS",question:"What type of screw has a hexagonal socket in the head?",choices:["Phillips","Slotted","Allen (hex)","Torx"],answer:2,explanation:"Allen screws have a hexagonal socket and require an Allen wrench."},
+      {id:"as13",section:"AS",question:"The primary function of engine oil is to:",choices:["Cool the engine","Lubricate moving parts","Filter the air","Power the alternator"],answer:1,explanation:"Engine oil reduces friction by lubricating moving engine components."},
+      {id:"as14",section:"AS",question:"A C-clamp is used to:",choices:["Measure surfaces","Cut metal","Hold pieces together","Drive screws"],answer:2,explanation:"C-clamps hold workpieces together securely during assembly or cutting."},
+      {id:"as15",section:"AS",question:"Which type of wrench is best for turning bolts in tight spaces?",choices:["Box-end wrench","Open-end wrench","Adjustable wrench","Pipe wrench"],answer:0,explanation:"Box-end wrenches fully enclose the bolt head and work well in tight spaces."},
+      {id:"as16",section:"AS",question:"Spark plugs are part of which system?",choices:["Cooling system","Electrical/ignition system","Braking system","Suspension system"],answer:1,explanation:"Spark plugs ignite the fuel-air mixture; they are part of the ignition system."},
+      {id:"as17",section:"AS",question:"What does OHV stand for in engine design?",choices:["Overhead Valve","Oil Hydraulic Vent","Outward High Volume","Optional Hybrid Vehicle"],answer:0,explanation:"OHV (Overhead Valve) refers to valves located in the cylinder head above the pistons."},
+      {id:"as18",section:"AS",question:"A level is used to:",choices:["Measure angles","Check if a surface is horizontal or vertical","Cut straight lines","Tighten bolts"],answer:1,explanation:"Levels determine whether a surface is perfectly horizontal (level) or vertical (plumb)."},
+      {id:"as19",section:"AS",question:"Rivets are used to:",choices:["Temporarily hold materials","Permanently fasten materials","Measure thickness","Cut materials"],answer:1,explanation:"Rivets are permanent fasteners used to join materials together."},
+      {id:"as20",section:"AS",question:"The differential in a vehicle allows:",choices:["The engine to start","The two drive wheels to rotate at different speeds","Brakes to engage","Steering to work"],answer:1,explanation:"The differential allows drive wheels to rotate at different speeds when turning."},
+      {id:"as21",section:"AS",question:"What is the purpose of a piston in an engine?",choices:["Filter fuel","Circulate oil","Convert gas pressure into mechanical movement","Cool the engine"],answer:2,explanation:"Pistons move up and down in cylinders, converting combustion energy to motion."},
+      {id:"as22",section:"AS",question:"Sandpaper grit numbers: a lower number means:",choices:["Finer abrasive","Coarser abrasive","Smoother finish","Less abrasion"],answer:1,explanation:"Lower grit numbers (e.g., 40) indicate coarser sandpaper for heavy material removal."},
+      {id:"as23",section:"AS",question:"Which of the following is a measuring tool?",choices:["Hammer","Chisel","Vernier caliper","C-clamp"],answer:2,explanation:"A vernier caliper precisely measures dimensions of objects."},
+      {id:"as24",section:"AS",question:"The purpose of the timing belt in an engine is to:",choices:["Reduce noise","Synchronize crankshaft and camshaft rotation","Lubricate valves","Power the alternator"],answer:1,explanation:"The timing belt keeps the crankshaft and camshaft in sync for proper valve timing."},
+      {id:"as25",section:"AS",question:"AWG (American Wire Gauge) numbers: a lower number indicates:",choices:["Thinner wire","Thicker wire","Higher resistance","Less current capacity"],answer:1,explanation:"Lower AWG numbers indicate thicker wire with more current capacity."}
+    ],
+    MC: [
+      {id:"mc1",section:"MC",question:"A lever can be used to:",choices:["Increase speed only","Multiply force","Reduce gravity","Increase weight"],answer:1,explanation:"Levers multiply applied force, allowing you to lift heavy objects more easily."},
+      {id:"mc2",section:"MC",question:"Work is defined as:",choices:["Force × velocity","Force × distance","Mass × velocity","Force ÷ distance"],answer:1,explanation:"Work = Force × Distance. Work is done only when force causes movement."},
+      {id:"mc3",section:"MC",question:"What is the mechanical advantage of a pulley system with 3 ropes supporting a load?",choices:["1","2","3","4"],answer:2,explanation:"The mechanical advantage equals the number of rope segments supporting the load."},
+      {id:"mc4",section:"MC",question:"An inclined plane (ramp) reduces the effort needed to lift an object by:",choices:["Reducing the object's weight","Increasing the distance over which force is applied","Eliminating friction","Changing the direction of force only"],answer:1,explanation:"A ramp spreads lifting force over a longer distance, reducing required effort."},
+      {id:"mc5",section:"MC",question:"Two gears are meshed together. If Gear A has 20 teeth and Gear B has 10 teeth, Gear B rotates:",choices:["At the same speed","At half the speed","Twice as fast","Four times faster"],answer:2,explanation:"Gear B (half the teeth) rotates twice as fast as Gear A."},
+      {id:"mc6",section:"MC",question:"Centrifugal force is experienced by an object:",choices:["At rest","Moving in a straight line","Moving in a circular path","Falling freely"],answer:2,explanation:"Centrifugal force (apparent outward force) acts on objects moving in circular paths."},
+      {id:"mc7",section:"MC",question:"Hydraulic systems multiply force because:",choices:["Water has high pressure naturally","Pressure is equal throughout a confined fluid","Metal pipes are very strong","Pistons are very heavy"],answer:1,explanation:"Pascal's law: pressure applied to a confined fluid transmits equally in all directions."},
+      {id:"mc8",section:"MC",question:"Which of the following is an example of a third-class lever?",choices:["Wheelbarrow","Seesaw","Tweezers","Crowbar"],answer:2,explanation:"In a third-class lever (tweezers), the effort is between the fulcrum and the load."},
+      {id:"mc9",section:"MC",question:"A spring scale measures:",choices:["Mass","Weight (gravitational force)","Density","Pressure"],answer:1,explanation:"Spring scales measure weight (force due to gravity)."},
+      {id:"mc10",section:"MC",question:"Pressure is defined as:",choices:["Force × area","Force ÷ area","Mass × velocity","Weight × height"],answer:1,explanation:"Pressure = Force ÷ Area. Higher area means lower pressure for same force."},
+      {id:"mc11",section:"MC",question:"A wheel and axle system multiplies:",choices:["Speed only","Distance","Force or speed depending on application","Weight"],answer:2,explanation:"Wheel and axle systems can multiply either force or speed depending on application."},
+      {id:"mc12",section:"MC",question:"Friction can be reduced by:",choices:["Increasing surface area","Adding lubrication","Increasing weight","Using rougher surfaces"],answer:1,explanation:"Lubrication reduces friction between moving surfaces."},
+      {id:"mc13",section:"MC",question:"If a 100-lb weight is placed 4 feet from a fulcrum, what force is needed 8 feet on the other side to balance?",choices:["200 lb","100 lb","50 lb","75 lb"],answer:2,explanation:"Lever balance: 100 × 4 = F × 8; F = 400/8 = 50 lb."},
+      {id:"mc14",section:"MC",question:"Newton's third law states:",choices:["Objects at rest stay at rest","Force equals mass times acceleration","For every action there is an equal and opposite reaction","Energy cannot be created or destroyed"],answer:2,explanation:"Newton's third law: every action has an equal and opposite reaction."},
+      {id:"mc15",section:"MC",question:"In an elastic collision, what is conserved?",choices:["Only momentum","Only kinetic energy","Both momentum and kinetic energy","Neither"],answer:2,explanation:"Elastic collisions conserve both momentum and kinetic energy."},
+      {id:"mc16",section:"MC",question:"A compound pulley system with 4 rope segments has a mechanical advantage of:",choices:["2","4","6","8"],answer:1,explanation:"Mechanical advantage = number of rope segments supporting the load = 4."},
+      {id:"mc17",section:"MC",question:"Tension is the force that:",choices:["Compresses an object","Stretches or pulls an object","Rotates an object","Bends an object"],answer:1,explanation:"Tension is a pulling force that stretches an object."},
+      {id:"mc18",section:"MC",question:"Which type of stress occurs when a material is squeezed from both ends?",choices:["Tension","Compression","Shear","Torsion"],answer:1,explanation:"Compression squeezes material from opposing directions."},
+      {id:"mc19",section:"MC",question:"A gas is compressed from 2 liters to 1 liter at constant temperature. The pressure:",choices:["Halves","Doubles","Stays the same","Quadruples"],answer:1,explanation:"Boyle's Law: at constant temperature, pressure and volume are inversely proportional."},
+      {id:"mc20",section:"MC",question:"Which simple machine is a doorknob an example of?",choices:["Lever","Pulley","Wheel and axle","Wedge"],answer:2,explanation:"A doorknob is a wheel and axle; the knob is the wheel and the shaft is the axle."},
+      {id:"mc21",section:"MC",question:"The mechanical advantage of a screw depends on its:",choices:["Weight","Material","Thread pitch and circumference","Color"],answer:2,explanation:"A screw's mechanical advantage is determined by its thread pitch."},
+      {id:"mc22",section:"MC",question:"Power is defined as:",choices:["Force × distance","Work ÷ time","Mass × acceleration","Speed × mass"],answer:1,explanation:"Power = Work ÷ Time. It measures how quickly work is done."},
+      {id:"mc23",section:"MC",question:"If an engine produces 300 lb of force and moves a piston 2 feet, the work done is:",choices:["150 ft-lb","302 ft-lb","600 ft-lb","300 ft-lb"],answer:2,explanation:"Work = Force × Distance = 300 × 2 = 600 ft-lb."},
+      {id:"mc24",section:"MC",question:"A pulley only changes the direction of force (no mechanical advantage) when it has:",choices:["2 rope segments","3 rope segments","1 rope segment","4 rope segments"],answer:2,explanation:"A single fixed pulley with 1 rope segment only changes direction, no MA gain."},
+      {id:"mc25",section:"MC",question:"Which of the following materials would provide the most resistance to bending?",choices:["Rubber","Wood","Steel I-beam","Aluminum sheet"],answer:2,explanation:"A steel I-beam is specifically designed for high resistance to bending forces."}
+    ],
+    AO: [
+      {id:"ao1",section:"AO",question:"A flat cross-shaped net (plus sign) is folded into a 3D shape. What shape does it form?",choices:["Pyramid","Cylinder","Cube","Cone"],answer:2,explanation:"A cross-shaped net folds into a cube (box)."},
+      {id:"ao2",section:"AO",question:"If the letter \"d\" is rotated 180 degrees, it becomes:",choices:["b","p","q","d"],answer:2,explanation:"Rotating 'd' 180° gives 'q'."},
+      {id:"ao3",section:"AO",question:"A square piece of paper is folded diagonally and cut along the fold. The two pieces are:",choices:["Two rectangles","Two triangles","Two squares","Two trapezoids"],answer:1,explanation:"Folding diagonally and cutting produces two right triangles."},
+      {id:"ao4",section:"AO",question:"Which shape can be folded to make a rectangular box without a lid?",choices:["A cross with 5 squares","A single square","Two triangles","A circle"],answer:0,explanation:"An open-top box net typically consists of 5 squares arranged in a cross/T shape."},
+      {id:"ao5",section:"AO",question:"If you look at a clock face in a mirror, what time does 3:00 appear to show?",choices:["3:00","9:00","6:00","12:00"],answer:1,explanation:"Mirror reversal of 3:00 shows 9:00."},
+      {id:"ao6",section:"AO",question:"A cube has 6 faces. How many edges does it have?",choices:["8","10","12","14"],answer:2,explanation:"A cube has 12 edges."},
+      {id:"ao7",section:"AO",question:"Three identical squares are placed side by side to form a rectangle. If each square is 4 inches on a side, the rectangle measures:",choices:["4 × 4","4 × 12","8 × 12","12 × 12"],answer:1,explanation:"Three 4-inch squares side by side: 12 inches wide × 4 inches tall."},
+      {id:"ao8",section:"AO",question:"A cylinder is cut in half lengthwise. The cross-section reveals:",choices:["A circle","A rectangle","A triangle","An oval"],answer:1,explanation:"Cutting a cylinder lengthwise produces a rectangular cross-section."},
+      {id:"ao9",section:"AO",question:"Point A is at (1,2) and point B is at (4,6). Which direction would you travel from A to B?",choices:["Down and left","Up and right","Down and right","Up and left"],answer:1,explanation:"Moving from (1,2) to (4,6) means x increases (right) and y increases (up)."},
+      {id:"ao10",section:"AO",question:"Two triangles are joined along their longest sides to form a:",choices:["Square","Rectangle","Rhombus","Pentagon"],answer:1,explanation:"Two right triangles joined along their hypotenuse form a rectangle."},
+      {id:"ao11",section:"AO",question:"A square is rotated 45 degrees. It now appears as:",choices:["A circle","A diamond/rhombus shape","A triangle","A rectangle"],answer:1,explanation:"A square rotated 45° looks like a diamond or rhombus."},
+      {id:"ao12",section:"AO",question:"How many corners (vertices) does a triangular prism have?",choices:["4","5","6","8"],answer:2,explanation:"A triangular prism has 6 vertices (3 on each triangular face)."},
+      {id:"ao13",section:"AO",question:"If puzzle piece A fits into slot B, and piece A is a notch pointing right, then slot B points:",choices:["Right","Left","Up","Down"],answer:1,explanation:"A notch pointing right fits into a slot pointing left (opposite)."},
+      {id:"ao14",section:"AO",question:"A rectangular block is 6 inches long, 4 inches wide, and 3 inches tall. If you view it from above, you see:",choices:["A 6 × 3 rectangle","A 4 × 3 rectangle","A 6 × 4 rectangle","A square"],answer:2,explanation:"Viewed from above (top view), you see the length × width = 6 × 4."},
+      {id:"ao15",section:"AO",question:"If you fold a piece of paper in half twice and cut a small square from the folded corner, you get:",choices:["One square hole","Two square holes","Four square holes","Eight square holes"],answer:2,explanation:"Two folds create 4 layers; cutting through all layers makes 4 holes."},
+      {id:"ao16",section:"AO",question:"A hexagon has how many sides?",choices:["5","6","7","8"],answer:1,explanation:"A hexagon has exactly 6 sides."}
+    ]
+  };
+
+  // ==================== SECTION CONFIG ====================
+  const SECTIONS = [
+    {key:"GS",name:"General Science",abbr:"GS",icon:"flask-conical",count:25,time:11,color:"#2563eb",afqt:false},
+    {key:"AR",name:"Arithmetic Reasoning",abbr:"AR",icon:"calculator",count:30,time:36,color:"#e85d04",afqt:true},
+    {key:"WK",name:"Word Knowledge",abbr:"WK",icon:"book-open",count:35,time:11,color:"#e85d04",afqt:true},
+    {key:"PC",name:"Paragraph Comprehension",abbr:"PC",icon:"file-text",count:15,time:13,color:"#e85d04",afqt:true},
+    {key:"MK",name:"Mathematics Knowledge",abbr:"MK",icon:"plus-circle",count:25,time:24,color:"#e85d04",afqt:true},
+    {key:"EI",name:"Electronics Information",abbr:"EI",icon:"zap",count:20,time:9,color:"#7c3aed",afqt:false},
+    {key:"AS",name:"Auto & Shop Information",abbr:"AS",icon:"wrench",count:25,time:11,color:"#b45309",afqt:false},
+    {key:"MC",name:"Mechanical Comprehension",abbr:"MC",icon:"cog",count:25,time:19,color:"#065f46",afqt:false},
+    {key:"AO",name:"Assembling Objects",abbr:"AO",icon:"puzzle",count:16,time:15,color:"#1d4ed8",afqt:false}
+  ];
+
+  // ==================== STATE ====================
+  let state = {
+    screen: 'home',
+    studyMode: false,
+    currentSection: null,
+    fullTest: false,
+    fullTestSections: [],
+    fullTestIndex: 0,
+    questions: [],
+    currentQ: 0,
+    correctCount: 0,
+    answered: false,
+    timerInterval: null,
+    timeRemaining: 0,
+    totalTime: 0,
+    results: {},
+    lastSection: null
+  };
+
+  // ==================== UTILITIES ====================
+  function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function getHighScores() {
+    try { return JSON.parse(localStorage.getItem('asvab_scores') || '{}'); } catch { return {}; }
+  }
+
+  function saveHighScore(section, pct) {
+    const scores = getHighScores();
+    if (!scores[section] || pct > scores[section]) scores[section] = pct;
+    localStorage.setItem('asvab_scores', JSON.stringify(scores));
+  }
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const el = document.getElementById(id);
+    if (el) { el.classList.add('active'); el.scrollTop = 0; window.scrollTo(0,0); }
+  }
+
+  function formatTime(sec) {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${m}:${s.toString().padStart(2, '0')}`;
+  }
+
+  function reInitIcons() {
+    if (typeof lucide !== "undefined" && typeof lucide.createIcons === "function") {
+      lucide.createIcons();
+    }
+  }
+
+  // ==================== HOME SCREEN ====================
+  function renderHome() {
+    const grid = document.getElementById('section-cards-grid');
+    grid.innerHTML = '';
+    SECTIONS.forEach((s, i) => {
+      const card = document.createElement('div');
+      card.className = 'section-card bg-base-700 rounded-2xl p-5 border border-base-600 hover:border-opacity-80 relative overflow-hidden';
+      card.style.borderLeftWidth = '4px';
+      card.style.borderLeftColor = s.color;
+      card.setAttribute('data-section', s.key);
+      card.innerHTML = `
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <i data-lucide="${s.icon}" class="w-5 h-5" style="color:${s.color}"></i>
+            <span class="text-xs font-bold uppercase tracking-wider" style="color:${s.color}">${s.abbr}</span>
+          </div>
+          ${s.afqt ? '<span class="afqt-badge">AFQT</span>' : ''}
+        </div>
+        <h4 class="text-sm font-bold text-txt-100 mb-2">${s.name}</h4>
+        <div class="flex items-center gap-4 text-xs text-txt-300">
+          <span class="flex items-center gap-1"><i data-lucide="help-circle" class="w-3 h-3"></i> ${s.count} Q</span>
+          <span class="flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i> ${s.time} min</span>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+
+    renderHighScores();
+    reInitIcons();
+
+    // Card click handlers
+    grid.querySelectorAll('.section-card').forEach(card => {
+      card.addEventListener('click', () => {
+        startSection(card.dataset.section);
+      });
+    });
+  }
+
+  function renderHighScores() {
+    const scores = getHighScores();
+    const grid = document.getElementById('high-scores-grid');
+    grid.innerHTML = '';
+    let hasScores = false;
+    SECTIONS.forEach(s => {
+      const pct = scores[s.key];
+      const el = document.createElement('div');
+      el.className = 'bg-base-700 rounded-xl p-3 text-center border border-base-600';
+      if (pct !== undefined) {
+        hasScores = true;
+        const pass = pct >= 70;
+        el.innerHTML = `
+          <span class="text-xs font-bold uppercase tracking-wider" style="color:${s.color}">${s.abbr}</span>
+          <p class="text-xl font-black mt-1 ${pass ? 'text-correct' : 'text-wrong'}">${pct}%</p>
+          <p class="text-[10px] text-txt-400">${pass ? 'PASS' : 'NEEDS WORK'}</p>
+        `;
+      } else {
+        el.innerHTML = `
+          <span class="text-xs font-bold uppercase tracking-wider" style="color:${s.color}">${s.abbr}</span>
+          <p class="text-sm font-bold mt-1 text-txt-400">—</p>
+          <p class="text-[10px] text-txt-400">Not taken</p>
+        `;
+      }
+      grid.appendChild(el);
+    });
+    document.getElementById('high-scores-section').style.display = hasScores ? 'block' : 'none';
+  }
+
+  // ==================== START QUIZ ====================
+  function startSection(sectionKey) {
+    const sect = SECTIONS.find(s => s.key === sectionKey);
+    if (!sect) return;
+    state.currentSection = sect;
+    state.fullTest = false;
+    state.questions = shuffle([...QUESTIONS[sectionKey]]);
+    state.currentQ = 0;
+    state.correctCount = 0;
+    state.answered = false;
+    state.totalTime = sect.time * 60;
+    state.timeRemaining = state.totalTime;
+    state.lastSection = sectionKey;
+
+    showScreen('quiz-screen');
+    renderQuestion();
+    if (!state.studyMode) startTimer();
+    updateTimerDisplay();
+  }
+
+  function startFullTest() {
+    state.fullTest = true;
+    state.fullTestSections = SECTIONS.map(s => s.key);
+    state.fullTestIndex = 0;
+    state.results = {};
+
+    startFullTestSection(0);
+  }
+
+  function startFullTestSection(idx) {
+    if (idx >= state.fullTestSections.length) {
+      showFullTestResults();
+      return;
+    }
+    const sKey = state.fullTestSections[idx];
+    const sect = SECTIONS.find(s => s.key === sKey);
+    state.currentSection = sect;
+    state.fullTestIndex = idx;
+    state.questions = shuffle([...QUESTIONS[sKey]]);
+    state.currentQ = 0;
+    state.correctCount = 0;
+    state.answered = false;
+    state.totalTime = sect.time * 60;
+    state.timeRemaining = state.totalTime;
+
+    showScreen('quiz-screen');
+    renderQuestion();
+    if (!state.studyMode) startTimer();
+    updateTimerDisplay();
+  }
+
+  // ==================== TIMER ====================
+  function startTimer() {
+    clearInterval(state.timerInterval);
+    if (state.studyMode) return;
+    state.timerInterval = setInterval(() => {
+      state.timeRemaining--;
+      updateTimerDisplay();
+      if (state.timeRemaining <= 0) {
+        clearInterval(state.timerInterval);
+        endQuiz();
+      }
+    }, 1000);
+  }
+
+  function updateTimerDisplay() {
+    const td = document.getElementById('timer-display');
+    const tt = document.getElementById('timer-text');
+    const tb = document.getElementById('timer-bar');
+    if (state.studyMode) {
+      tt.textContent = 'Study Mode';
+      tb.style.width = '100%';
+      tb.style.background = '#4a9c59';
+      td.style.color = '#4a9c59';
+      return;
+    }
+    tt.textContent = formatTime(state.timeRemaining);
+    const pct = (state.timeRemaining / state.totalTime) * 100;
+    tb.style.width = pct + '%';
+    if (pct <= 20) {
+      tb.style.background = '#ef4444';
+      td.style.color = '#ef4444';
+    } else if (pct <= 50) {
+      tb.style.background = '#c8a84b';
+      td.style.color = '#c8a84b';
+    } else {
+      tb.style.background = '#4a9c59';
+      td.style.color = '#4a9c59';
+    }
+  }
+
+  // ==================== RENDER QUESTION ====================
+  function renderQuestion() {
+    const q = state.questions[state.currentQ];
+    if (!q) { endQuiz(); return; }
+    const sect = state.currentSection;
+    state.answered = false;
+
+    // Header
+    const badge = document.getElementById('quiz-section-badge');
+    badge.textContent = sect.abbr;
+    badge.style.background = sect.color;
+    badge.style.color = '#fff';
+    document.getElementById('quiz-section-name').textContent = sect.name;
+
+    // Progress
+    const total = state.questions.length;
+    const cur = state.currentQ + 1;
+    document.getElementById('quiz-progress-text').textContent = `Question ${cur} of ${total}`;
+    document.getElementById('quiz-progress-bar').style.width = ((cur / total) * 100) + '%';
+    document.getElementById('quiz-score-live').textContent = `${state.correctCount} correct`;
+
+    // Question
+    document.getElementById('question-number-label').textContent = `Question ${cur}`;
+    document.getElementById('question-text').textContent = q.question;
+
+    // Passage
+    const pb = document.getElementById('passage-block');
+    if (q.passage) {
+      pb.textContent = q.passage;
+      pb.classList.remove('hidden');
+    } else {
+      pb.classList.add('hidden');
+    }
+
+    // Choices
+    const container = document.getElementById('choices-container');
+    container.innerHTML = '';
+    const letters = ['A','B','C','D'];
+    q.choices.forEach((c, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'choice-btn flex items-center gap-3 w-full text-left bg-base-700 border-2 border-base-600 rounded-xl px-5 py-4 text-txt-100 font-medium hover:bg-base-600 min-h-[44px] cursor-pointer';
+      btn.setAttribute('data-idx', i);
+      btn.innerHTML = `<span class="flex items-center justify-center w-8 h-8 rounded-lg bg-base-600 text-xs font-bold text-txt-300 flex-shrink-0">${letters[i]}<span class="kb-hint ml-1">${i+1}</span></span><span>${c}</span>`;
+      container.appendChild(btn);
+    });
+
+    // Hide explanation & next
+    document.getElementById('explanation-box').classList.add('hidden');
+    document.getElementById('next-btn').style.display = 'none';
+    document.getElementById('skip-btn').style.display = 'flex';
+
+    reInitIcons();
+
+    // Choice click handlers
+    container.querySelectorAll('.choice-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (state.answered) return;
+        handleAnswer(parseInt(btn.dataset.idx));
+      });
+    });
+  }
+
+  // ==================== HANDLE ANSWER ====================
+  function handleAnswer(idx) {
+    if (state.answered) return;
+    state.answered = true;
+    const q = state.questions[state.currentQ];
+    const correct = q.answer;
+    const isCorrect = idx === correct;
+
+    if (isCorrect) state.correctCount++;
+
+    // Highlight choices
+    const btns = document.querySelectorAll('.choice-btn');
+    btns.forEach(btn => {
+      btn.classList.add('answered');
+      const bIdx = parseInt(btn.dataset.idx);
+      if (bIdx === correct) btn.classList.add('correct-ans');
+      else if (bIdx === idx && !isCorrect) btn.classList.add('wrong-ans');
+    });
+
+    // Show explanation
+    document.getElementById('explanation-text').textContent = q.explanation;
+    document.getElementById('explanation-box').classList.remove('hidden');
+
+    // Show next, hide skip
+    document.getElementById('next-btn').style.display = 'flex';
+    document.getElementById('skip-btn').style.display = 'none';
+  }
+
+  function nextQuestion() {
+    state.currentQ++;
+    if (state.currentQ >= state.questions.length) {
+      endQuiz();
+    } else {
+      renderQuestion();
+    }
+  }
+
+  function skipQuestion() {
+    if (state.answered) return;
+    state.currentQ++;
+    if (state.currentQ >= state.questions.length) {
+      endQuiz();
+    } else {
+      renderQuestion();
+    }
+  }
+
+  // ==================== END QUIZ ====================
+  function endQuiz() {
+    clearInterval(state.timerInterval);
+    const total = state.questions.length;
+    const correct = state.correctCount;
+    const pct = Math.round((correct / total) * 100);
+
+    if (state.fullTest) {
+      state.results[state.currentSection.key] = { correct, total, pct };
+      // Move to next section
+      if (state.fullTestIndex < state.fullTestSections.length - 1) {
+        startFullTestSection(state.fullTestIndex + 1);
+        return;
+      } else {
+        showFullTestResults();
+        return;
+      }
+    }
+
+    saveHighScore(state.currentSection.key, pct);
+    showResults(pct, correct, total);
+  }
+
+  function showResults(pct, correct, total) {
+    showScreen('results-screen');
+
+    const pass = pct >= 70;
+    const ring = document.getElementById('score-circle-ring');
+    const offset = 440 - (440 * pct / 100);
+    ring.style.strokeDashoffset = offset;
+    ring.style.stroke = pass ? '#22c55e' : '#ef4444';
+
+    document.getElementById('score-percent').textContent = pct + '%';
+    document.getElementById('score-fraction').textContent = `${correct} / ${total}`;
+
+    const badge = document.getElementById('pass-fail-badge');
+    const badgeText = document.getElementById('pass-fail-text');
+    if (pass) {
+      badge.style.background = 'rgba(34,197,94,.15)';
+      badge.style.color = '#22c55e';
+      badgeText.textContent = 'PASS';
+    } else {
+      badge.style.background = 'rgba(239,68,68,.15)';
+      badge.style.color = '#ef4444';
+      badgeText.textContent = 'NEEDS IMPROVEMENT';
+    }
+
+    const msg = document.getElementById('result-message');
+    if (pct >= 90) msg.textContent = "Outstanding performance, Brian! You're well-prepared for this section.";
+    else if (pct >= 70) msg.textContent = "Good job, Brian! You passed. Review any missed questions to strengthen weak areas.";
+    else if (pct >= 50) msg.textContent = "Keep studying, Brian. Review the explanations for missed questions and try again.";
+    else msg.textContent = "This section needs more work, Brian. Focus on studying the material before retaking.";
+
+    document.getElementById('section-breakdown').classList.add('hidden');
+    reInitIcons();
+  }
+
+  function showFullTestResults() {
+    showScreen('results-screen');
+
+    let totalCorrect = 0, totalQ = 0;
+    Object.values(state.results).forEach(r => {
+      totalCorrect += r.correct;
+      totalQ += r.total;
+    });
+    const pct = Math.round((totalCorrect / totalQ) * 100);
+    const pass = pct >= 70;
+
+    const ring = document.getElementById('score-circle-ring');
+    const offset = 440 - (440 * pct / 100);
+    ring.style.strokeDashoffset = offset;
+    ring.style.stroke = pass ? '#22c55e' : '#ef4444';
+
+    document.getElementById('score-percent').textContent = pct + '%';
+    document.getElementById('score-fraction').textContent = `${totalCorrect} / ${totalQ}`;
+
+    const badge = document.getElementById('pass-fail-badge');
+    const badgeText = document.getElementById('pass-fail-text');
+    if (pass) {
+      badge.style.background = 'rgba(34,197,94,.15)'; badge.style.color = '#22c55e'; badgeText.textContent = 'PASS';
+    } else {
+      badge.style.background = 'rgba(239,68,68,.15)'; badge.style.color = '#ef4444'; badgeText.textContent = 'NEEDS IMPROVEMENT';
+    }
+
+    const msg = document.getElementById('result-message');
+    if (pct >= 90) msg.textContent = "Outstanding full-test performance, Brian! You're ready.";
+    else if (pct >= 70) msg.textContent = "Solid work on the full test, Brian! Focus on weaker sections.";
+    else msg.textContent = "Keep studying, Brian. Review the section breakdown below.";
+
+    // Section breakdown table
+    const breakdown = document.getElementById('section-breakdown');
+    breakdown.classList.remove('hidden');
+    const tbody = document.getElementById('breakdown-body');
+    tbody.innerHTML = '';
+    SECTIONS.forEach(s => {
+      const r = state.results[s.key];
+      if (!r) return;
+      const sp = r.pct;
+      const spass = sp >= 70;
+      saveHighScore(s.key, sp);
+      const tr = document.createElement('tr');
+      tr.className = 'border-b border-base-600';
+      tr.innerHTML = `
+        <td class="py-3 text-txt-100 font-medium">${s.afqt ? '<span class="afqt-badge mr-2">AFQT</span>' : ''}${s.name}</td>
+        <td class="py-3 text-center text-txt-200">${r.correct}/${r.total}</td>
+        <td class="py-3 text-center font-bold ${spass ? 'text-correct' : 'text-wrong'}">${sp}%</td>
+        <td class="py-3 text-right"><span class="text-xs px-2 py-1 rounded ${spass ? 'bg-correct/10 text-correct' : 'bg-wrong/10 text-wrong'}">${spass ? 'PASS' : 'FAIL'}</span></td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    reInitIcons();
+  }
+
+  // ==================== KEYBOARD SHORTCUTS ====================
+  document.addEventListener('keydown', (e) => {
+    const quizScreen = document.getElementById('quiz-screen');
+    if (!quizScreen.classList.contains('active')) return;
+
+    const key = e.key.toLowerCase();
+    if (!state.answered) {
+      if (key === '1' || key === 'a') handleAnswer(0);
+      else if (key === '2' || key === 'b') handleAnswer(1);
+      else if (key === '3' || key === 'c') handleAnswer(2);
+      else if (key === '4' || key === 'd') handleAnswer(3);
+      else if (key === 's') skipQuestion();
+    }
+    if (state.answered && (key === 'enter' || key === ' ')) {
+      e.preventDefault();
+      nextQuestion();
+    }
+  });
+
+  // ==================== EVENT LISTENERS ====================
+  if (typeof lucide !== "undefined" && typeof lucide.createIcons === "function") {
+    lucide.createIcons();
+  }
+
+  // Initialize home
+  renderHome();
+
+  // Study mode toggle
+  document.getElementById('study-toggle-btn').addEventListener('click', function() {
+    state.studyMode = !state.studyMode;
+    this.classList.toggle('on', state.studyMode);
+    this.setAttribute('aria-checked', state.studyMode ? 'true' : 'false');
+  });
+  document.getElementById('study-toggle-btn').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      this.click();
+    }
+  });
+
+  // Mode buttons
+  document.getElementById('mode-section-btn').addEventListener('click', () => {
+    document.getElementById('section-cards-grid').scrollIntoView({ behavior: 'smooth' });
+  });
+  document.getElementById('mode-full-btn').addEventListener('click', () => {
+    startFullTest();
+  });
+
+  // Quiz nav
+  document.getElementById('quiz-back-btn').addEventListener('click', () => {
+    clearInterval(state.timerInterval);
+    showScreen('home-screen');
+    renderHome();
+  });
+  document.getElementById('next-btn').addEventListener('click', nextQuestion);
+  document.getElementById('skip-btn').addEventListener('click', skipQuestion);
+
+  // Results nav
+  document.getElementById('retake-btn').addEventListener('click', () => {
+    if (state.fullTest) {
+      startFullTest();
+    } else if (state.lastSection) {
+      startSection(state.lastSection);
+    } else {
+      showScreen('home-screen');
+      renderHome();
+    }
+  });
+  document.getElementById('home-btn').addEventListener('click', () => {
+    showScreen('home-screen');
+    renderHome();
+  });
+
+  // Reset scores
+  document.getElementById('reset-scores-btn').addEventListener('click', () => {
+    localStorage.removeItem('asvab_scores');
+    renderHighScores();
+  });
+  document.getElementById('reset-scores-mobile').addEventListener('click', () => {
+    localStorage.removeItem('asvab_scores');
+    renderHighScores();
+    document.getElementById('mobile-menu-home').classList.add('hidden');
+  });
+
+  // Mobile menu
+  document.getElementById('mobile-menu-btn-home').addEventListener('click', () => {
+    document.getElementById('mobile-menu-home').classList.remove('hidden');
+  });
+  document.getElementById('mobile-menu-close-home').addEventListener('click', () => {
+    document.getElementById('mobile-menu-home').classList.add('hidden');
+  });
+  </script>
+</body>
+</html>
