@@ -42,10 +42,17 @@
     @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
     .pulse-anim { animation: pulse 1.5s infinite; }
     .timer-bar { transition: width .5s linear; }
-    .choice-btn { transition: all .2s ease; }
-    .choice-btn:hover:not(.answered) { transform: translateX(6px); border-color: #c8a84b; }
-    .choice-btn.correct-ans { background: rgba(34,197,94,.15) !important; border-color: #22c55e !important; color: #22c55e !important; }
-    .choice-btn.wrong-ans { background: rgba(239,68,68,.15) !important; border-color: #ef4444 !important; color: #ef4444 !important; }
+    .choice-btn { transition: all .2s ease; border: 2px solid #2f3550; }
+    .choice-btn:hover:not(.answered) { border-color: #c8a84b; background: rgba(200,168,75,.07); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(200,168,75,.12); }
+    .choice-btn.correct-ans { background: rgba(34,197,94,.12) !important; border-color: #22c55e !important; }
+    .choice-btn.correct-ans .letter-badge { background: #22c55e !important; color: #fff !important; }
+    .choice-btn.correct-ans .choice-text { color: #22c55e !important; font-weight:700; }
+    .choice-btn.wrong-ans { background: rgba(239,68,68,.12) !important; border-color: #ef4444 !important; }
+    .choice-btn.wrong-ans .letter-badge { background: #ef4444 !important; color: #fff !important; }
+    .choice-btn.wrong-ans .choice-text { color: #ef4444 !important; }
+    .choice-btn.answered { cursor: default; }
+    .letter-badge { display:flex; align-items:center; justify-content:center; width:40px; height:40px; min-width:40px; border-radius:50%; background:#2f3550; color:#c8a84b; font-size:15px; font-weight:800; transition: background .2s, color .2s; }
+    .choice-icon { margin-left:auto; flex-shrink:0; font-size:18px; }
     .mil-star { display:inline-flex; align-items:center; justify-content:center; width:64px; height:64px; background:linear-gradient(135deg,#3a7c47,#4a9c59); border-radius:50%; border:3px solid #c8a84b; }
     .section-card { transition: all .25s ease; cursor:pointer; }
     .section-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0,0,0,.4); }
@@ -221,19 +228,13 @@
       </div>
 
       <!-- Action Buttons -->
-      <div data-id="88" class="flex items-center justify-between gap-3">
-        <button data-id="89" id="skip-btn" class="flex items-center gap-2 text-sm text-txt-400 hover:text-txt-200 min-h-[44px] px-4 bg-base-700 rounded-xl border border-base-600 hover:border-base-500 transition-all">
-          <i data-id="90" data-lucide="skip-forward" class="w-4 h-4"></i> Skip
+      <div class="flex flex-col gap-3 mt-2">
+        <button id="next-btn" style="display:none" class="flex items-center justify-center gap-2 w-full text-base font-bold text-white bg-mil-green hover:bg-mil-greenlt min-h-[56px] rounded-2xl transition-all uppercase tracking-wider shadow-lg">
+          Next Question <i data-lucide="arrow-right" class="w-5 h-5"></i>
         </button>
-        <button data-id="91" id="next-btn" class="hidden flex items-center gap-2 text-sm font-bold text-base-900 bg-mil-green hover:bg-mil-greenlt min-h-[44px] px-6 rounded-xl transition-all uppercase tracking-wide">
-          Next <i data-id="92" data-lucide="arrow-right" class="w-4 h-4"></i>
-          <span data-id="93" class="kb-hint text-base-900 border-base-900">Enter</span>
+        <button id="skip-btn" class="flex items-center justify-center gap-2 w-full text-sm text-txt-400 hover:text-txt-200 min-h-[48px] bg-base-700 rounded-2xl border border-base-600 hover:border-base-500 transition-all">
+          <i data-lucide="skip-forward" class="w-4 h-4"></i> Skip Question
         </button>
-      </div>
-
-      <!-- Keyboard Hints -->
-      <div data-id="94" class="mt-6 text-center hidden md:block">
-        <p data-id="95" class="text-[10px] text-txt-400">Press <span data-id="96" class="kb-hint">1</span><span data-id="97" class="kb-hint">2</span><span data-id="98" class="kb-hint">3</span><span data-id="99" class="kb-hint">4</span> or <span data-id="100" class="kb-hint">A</span><span data-id="101" class="kb-hint">B</span><span data-id="102" class="kb-hint">C</span><span data-id="103" class="kb-hint">D</span> to answer · <span data-id="104" class="kb-hint">Enter</span> for next · <span data-id="105" class="kb-hint">S</span> to skip</p>
       </div>
     </main>
   </div>
@@ -811,9 +812,10 @@
     const letters = ['A','B','C','D'];
     q.choices.forEach((c, i) => {
       const btn = document.createElement('button');
-      btn.className = 'choice-btn flex items-center gap-3 w-full text-left bg-base-700 border-2 border-base-600 rounded-xl px-5 py-4 text-txt-100 font-medium hover:bg-base-600 min-h-[44px] cursor-pointer';
+      btn.className = 'choice-btn flex items-center gap-4 w-full text-left bg-base-700 rounded-2xl px-4 py-4 cursor-pointer';
       btn.setAttribute('data-idx', i);
-      btn.innerHTML = `<span class="flex items-center justify-center w-8 h-8 rounded-lg bg-base-600 text-xs font-bold text-txt-300 flex-shrink-0">${letters[i]}<span class="kb-hint ml-1">${i+1}</span></span><span>${c}</span>`;
+      btn.style.minHeight = '64px';
+      btn.innerHTML = `<span class="letter-badge">${letters[i]}</span><span class="choice-text flex-1 text-txt-100 font-medium text-base leading-snug">${c}</span><span class="choice-icon opacity-0"></span>`;
       container.appendChild(btn);
     });
 
@@ -848,8 +850,14 @@
     btns.forEach(btn => {
       btn.classList.add('answered');
       const bIdx = parseInt(btn.dataset.idx);
-      if (bIdx === correct) btn.classList.add('correct-ans');
-      else if (bIdx === idx && !isCorrect) btn.classList.add('wrong-ans');
+      const icon = btn.querySelector('.choice-icon');
+      if (bIdx === correct) {
+        btn.classList.add('correct-ans');
+        if (icon) { icon.textContent = '✓'; icon.style.opacity = '1'; icon.style.color = '#22c55e'; }
+      } else if (bIdx === idx && !isCorrect) {
+        btn.classList.add('wrong-ans');
+        if (icon) { icon.textContent = '✗'; icon.style.opacity = '1'; icon.style.color = '#ef4444'; }
+      }
     });
 
     // Show explanation
