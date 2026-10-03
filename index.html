@@ -68,6 +68,16 @@
     @keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
     .slide-up { animation: slideUp .5s ease-out forwards; }
     .kb-hint { font-size:10px; color:#64748b; border:1px solid #3a4163; border-radius:4px; padding:1px 5px; margin-left:4px; }
+    /* TTS Speaker Buttons */
+    .speaker-btn { display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:#252a3d;border:2px solid #c8a84b;color:#c8a84b;cursor:pointer;transition:all .2s ease;flex-shrink:0;padding:0; }
+    .speaker-btn:hover { background:#c8a84b;color:#1a1e2e; }
+    .speaker-btn.speaking { background:#c8a84b;color:#1a1e2e;animation:pulse 1s infinite; }
+    .float-speaker { position:fixed;bottom:24px;right:24px;width:56px;height:56px;border-radius:50%;background:#4a9c59;color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 20px rgba(0,0,0,.4);z-index:100;transition:all .2s ease; }
+    .float-speaker:hover { background:#5cb86d;transform:scale(1.05); }
+    .float-speaker.speaking { animation:pulse 1s infinite;background:#c8a84b; }
+    .wk-word { color:#c8a84b;font-weight:800;cursor:pointer;border-bottom:2px solid #c8a84b;border-radius:3px;padding:0 2px;display:inline; }
+    .wk-word:hover { background:rgba(200,168,75,.2); }
+
   </style>
 </head>
 <body data-id="0" class="min-h-screen">
@@ -113,7 +123,7 @@
           <i data-id="26" data-lucide="shield" class="w-10 h-10 text-white"></i>
         </div>
         <h2 data-id="27" class="text-2xl md:text-4xl font-black uppercase tracking-tight text-txt-100 mb-2">ASVAB Practice Test</h2>
-        <p data-id="28" class="text-sm md:text-base text-txt-300 max-w-xl mx-auto mb-5">Master every section of the Armed Services Vocational Aptitude Battery with 216 practice questions across all 9 subtests.</p>
+        <p data-id="28" class="text-sm md:text-base text-txt-300 max-w-xl mx-auto mb-5">Master every section of the Armed Services Vocational Aptitude Battery with 356+ practice questions across all 9 subtests.</p>
         <!-- AFQT Info Badge -->
         <div data-id="29" id="afqt-badge-home" class="inline-flex items-center gap-3 bg-base-700 rounded-xl px-5 py-3 border border-base-600">
           <span data-id="30" class="afqt-badge">AFQT</span>
@@ -136,7 +146,7 @@
             <i data-id="41" data-lucide="clock" class="w-6 h-6 text-mil-gold group-hover:text-mil-goldlt"></i>
             <h3 data-id="42" class="text-lg font-bold uppercase text-txt-100">Full Practice Test</h3>
           </div>
-          <p data-id="43" class="text-sm text-txt-300">All 9 sections with real ASVAB time limits. 216 questions total.</p>
+          <p data-id="43" class="text-sm text-txt-300">All 9 sections with real ASVAB time limits. 356+ questions total.</p>
         </button>
       </div>
 
@@ -183,6 +193,7 @@
         <span data-id="65" id="quiz-section-name" class="text-sm font-bold text-txt-100 uppercase hidden md:inline"></span>
       </div>
       <div data-id="66" class="flex items-center gap-3">
+        <button id="quiz-speaker-btn" class="speaker-btn" title="Read question aloud" aria-label="Read question aloud">🔊</button>
         <div data-id="67" id="timer-display" class="flex items-center gap-1 text-sm font-mono font-bold text-mil-green">
           <i data-id="68" data-lucide="timer" class="w-4 h-4"></i>
           <span data-id="69" id="timer-text">11:00</span>
@@ -306,6 +317,34 @@
   </div>
 
   <script>
+  // ==================== TEXT-TO-SPEECH ====================
+  function speak(text, rate) {
+    rate = rate || 1.0;
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    var utt = new SpeechSynthesisUtterance(text);
+    utt.rate = rate;
+    utt.pitch = 1.0;
+    utt.volume = 1.0;
+    utt.lang = 'en-US';
+    utt.onstart = function() {
+      document.querySelectorAll('.speaker-btn,.float-speaker').forEach(function(b){b.classList.add('speaking');});
+    };
+    utt.onend = utt.onerror = function() {
+      document.querySelectorAll('.speaker-btn,.float-speaker').forEach(function(b){b.classList.remove('speaking');});
+    };
+    window.speechSynthesis.speak(utt);
+  }
+
+  function speakCurrentQuestion() {
+    if (!state.questions || state.currentQ === undefined) return;
+    var q = state.questions[state.currentQ];
+    if (!q) return;
+    var text = q.question;
+    if (q.passage) text = 'Passage: ' + q.passage + '. Question: ' + q.question;
+    speak(text, 0.9);
+  }
+
   // ==================== QUESTION BANK ====================
   const QUESTIONS = {
     GS: [
@@ -333,7 +372,32 @@
       {id:"gs22",section:"GS",question:"A fault is:",choices:["A mountain","A crack in the Earth's crust","A type of cloud","An ocean current"],answer:1,explanation:"Faults are cracks in the Earth's crust along which earthquakes occur."},
       {id:"gs23",section:"GS",question:"Cumulus clouds are characterized by:",choices:["Thin and feathery appearance","Flat bottoms and round tops","Broad and low appearance","Dark and stormy layers"],answer:1,explanation:"Cumulus clouds have flat bottoms and round tops and indicate fair weather."},
       {id:"gs24",section:"GS",question:"The sex of a human child is determined by:",choices:["The mother's chromosome","The father's chromosome","Both parents equally","Random selection"],answer:1,explanation:"The father contributes either an X or Y chromosome, determining the child's sex."},
-      {id:"gs25",section:"GS",question:"Which planet has the most famous ring system?",choices:["Jupiter","Uranus","Neptune","Saturn"],answer:3,explanation:"Saturn's rings are the most prominent and well-known in the solar system."}
+      {id:"gs25",section:"GS",question:"Which planet has the most famous ring system?",choices:["Jupiter","Uranus","Neptune","Saturn"],answer:3,explanation:"Saturn's rings are the most prominent and well-known in the solar system."},
+      {id:"gs26",section:"GS",question:"Which vitamin is produced by the skin when exposed to sunlight?",choices:["Vitamin A","Vitamin B12","Vitamin C","Vitamin D"],answer:3,explanation:"Sunlight triggers Vitamin D synthesis in the skin."},
+      {id:"gs27",section:"GS",question:"The human heart has how many chambers?",choices:["2","3","4","6"],answer:2,explanation:"The heart has four chambers: left atrium, right atrium, left ventricle, right ventricle."},
+      {id:"gs28",section:"GS",question:"Which gas makes up approximately 78% of Earth's atmosphere?",choices:["Oxygen","Nitrogen","Carbon dioxide","Argon"],answer:1,explanation:"Nitrogen (N₂) makes up about 78% of the atmosphere; oxygen is about 21%."},
+      {id:"gs29",section:"GS",question:"What is the speed of light in a vacuum?",choices:["186,000 miles per second","100,000 miles per second","300,000 km per hour","18,600 miles per second"],answer:0,explanation:"Light travels at approximately 186,000 miles per second (300,000 km/s) in a vacuum."},
+      {id:"gs30",section:"GS",question:"Atoms of the same element with different numbers of neutrons are called:",choices:["Ions","Isotopes","Alloys","Polymers"],answer:1,explanation:"Isotopes are atoms of the same element with different neutron counts."},
+      {id:"gs31",section:"GS",question:"The process of a solid turning directly into a gas is called:",choices:["Condensation","Evaporation","Sublimation","Deposition"],answer:2,explanation:"Sublimation is the phase change from solid directly to gas (e.g., dry ice)."},
+      {id:"gs32",section:"GS",question:"Which part of the brain controls balance and coordination?",choices:["Cerebrum","Medulla","Cerebellum","Thalamus"],answer:2,explanation:"The cerebellum coordinates voluntary movements, balance, and posture."},
+      {id:"gs33",section:"GS",question:"Photosynthesis converts light energy into:",choices:["Electrical energy","Chemical energy (glucose)","Mechanical energy","Nuclear energy"],answer:1,explanation:"Photosynthesis converts sunlight, CO₂, and water into glucose (chemical energy)."},
+      {id:"gs34",section:"GS",question:"The periodic table organizes elements by:",choices:["Atomic mass","Alphabetical order","Atomic number","Color"],answer:2,explanation:"Elements are arranged by increasing atomic number (protons) in the periodic table."},
+      {id:"gs35",section:"GS",question:"Which bone protects the brain?",choices:["Femur","Sternum","Skull","Vertebra"],answer:2,explanation:"The skull (cranium) encases and protects the brain."},
+      {id:"gs36",section:"GS",question:"Acid rain is primarily caused by emissions of:",choices:["Carbon dioxide and methane","Sulfur dioxide and nitrogen oxides","Ozone and chlorine","Hydrogen and helium"],answer:1,explanation:"Sulfur dioxide and nitrogen oxides react with water vapor to form acid rain."},
+      {id:"gs37",section:"GS",question:"Which type of rock is formed from cooled magma?",choices:["Sedimentary","Metamorphic","Igneous","Limestone"],answer:2,explanation:"Igneous rocks form when magma (molten rock) cools and solidifies."},
+      {id:"gs38",section:"GS",question:"The function of red blood cells is to:",choices:["Fight infection","Transport oxygen","Clot blood","Produce hormones"],answer:1,explanation:"Red blood cells (erythrocytes) carry oxygen throughout the body via hemoglobin."},
+      {id:"gs39",section:"GS",question:"Which planet is closest in size to Earth?",choices:["Mars","Mercury","Venus","Uranus"],answer:2,explanation:"Venus is nearly the same size as Earth, with a diameter about 95% of Earth's."},
+      {id:"gs40",section:"GS",question:"Newton's First Law states that an object at rest:",choices:["Falls due to gravity","Stays at rest unless acted upon by a force","Accelerates uniformly","Has no mass"],answer:1,explanation:"Newton's First Law (Inertia): an object at rest stays at rest unless acted on by an unbalanced force."},
+      {id:"gs41",section:"GS",question:"Heredity is the passing of traits from:",choices:["Teacher to student","Parent to offspring","One species to another","Environment to organism"],answer:1,explanation:"Heredity is the biological process by which traits are passed from parents to their offspring."},
+      {id:"gs42",section:"GS",question:"The average human body temperature is approximately:",choices:["96.6°F","97.8°F","98.6°F","100.2°F"],answer:2,explanation:"Normal human body temperature is 98.6°F (37°C)."},
+      {id:"gs43",section:"GS",question:"Which organ is responsible for filtering blood and producing urine?",choices:["Liver","Heart","Lung","Kidney"],answer:3,explanation:"The kidneys filter waste from blood and produce urine to excrete it."},
+      {id:"gs44",section:"GS",question:"An ecosystem includes:",choices:["Only living organisms","Only non-living factors","Both living organisms and their environment","Only plants and animals"],answer:2,explanation:"An ecosystem includes all living organisms (biotic) and non-living factors (abiotic) in an area."},
+      {id:"gs45",section:"GS",question:"What is the process by which plants lose water through their leaves?",choices:["Osmosis","Transpiration","Photosynthesis","Respiration"],answer:1,explanation:"Transpiration is the evaporation of water from plant leaves through tiny pores called stomata."},
+      {id:"gs46",section:"GS",question:"Sound travels fastest through:",choices:["Vacuum","Air","Water","Steel"],answer:3,explanation:"Sound travels fastest through solids like steel because particles are closely packed."},
+      {id:"gs47",section:"GS",question:"Which of these is NOT a type of simple machine?",choices:["Lever","Wheel and axle","Battery","Pulley"],answer:2,explanation:"The six simple machines are: lever, wheel and axle, pulley, inclined plane, wedge, and screw. A battery is not one."},
+      {id:"gs48",section:"GS",question:"The ozone layer primarily protects Earth from:",choices:["Solar wind","UV radiation","Cosmic rays","Acid rain"],answer:1,explanation:"The ozone layer in the stratosphere absorbs and blocks harmful ultraviolet (UV) radiation."},
+      {id:"gs49",section:"GS",question:"In genetics, dominant traits are expressed when:",choices:["Only two recessive alleles are present","At least one dominant allele is present","Neither allele is present","The environment triggers them"],answer:1,explanation:"A dominant trait is expressed whenever at least one dominant allele is present (AA or Aa)."},
+      {id:"gs50",section:"GS",question:"Which of the following is a renewable energy source?",choices:["Coal","Natural gas","Nuclear fission","Solar"],answer:3,explanation:"Solar energy is renewable because it comes from the sun and will not run out in any practical timeframe."}
     ],
     AR: [
       {id:"ar1",section:"AR",question:"If apples cost $3 for 15, what is the cost of one apple?",choices:["$0.50","$0.25","$0.20","$0.30"],answer:2,explanation:"Divide $3 by 15 = $0.20 per apple."},
@@ -365,7 +429,27 @@
       {id:"ar27",section:"AR",question:"Water flows into a tank at 15 gallons per minute. How long to fill a 600-gallon tank?",choices:["30 min","35 min","40 min","45 min"],answer:2,explanation:"600 ÷ 15 = 40 minutes."},
       {id:"ar28",section:"AR",question:"A soldier's base pay is $3,200/month plus $400 housing allowance. Annual income equals:",choices:["$40,800","$43,200","$38,400","$42,400"],answer:1,explanation:"($3,200 + $400) × 12 = $3,600 × 12 = $43,200."},
       {id:"ar29",section:"AR",question:"A triangle has sides of 9, 10, and 11 feet. What is its perimeter?",choices:["20","25","30","35"],answer:2,explanation:"9 + 10 + 11 = 30 feet."},
-      {id:"ar30",section:"AR",question:"Ticket prices increased 25% from $80 last year. New price:",choices:["$95","$100","$105","$110"],answer:1,explanation:"$80 × 1.25 = $100."}
+      {id:"ar30",section:"AR",question:"Ticket prices increased 25% from $80 last year. New price:",choices:["$95","$100","$105","$110"],answer:1,explanation:"$80 × 1.25 = $100."},
+      {id:"ar31",section:"AR",question:"A military convoy travels 240 miles in 4 hours. At this rate, how far will it travel in 7 hours?",choices:["380 miles","400 miles","420 miles","440 miles"],answer:2,explanation:"Rate = 60 mph; 60 × 7 = 420 miles."},
+      {id:"ar32",section:"AR",question:"If 8 soldiers can dig a trench in 6 hours, how long will 12 soldiers take?",choices:["3 hours","4 hours","5 hours","6 hours"],answer:1,explanation:"Total work = 48 soldier-hours; 48 ÷ 12 = 4 hours."},
+      {id:"ar33",section:"AR",question:"A helicopter burns 50 gallons of fuel per hour. How much fuel is used in a 3.5-hour mission?",choices:["150 gal","165 gal","175 gal","180 gal"],answer:2,explanation:"50 × 3.5 = 175 gallons."},
+      {id:"ar34",section:"AR",question:"A bunk costs $45 per night. What is the total cost for 3 soldiers staying 5 nights each?",choices:["$600","$650","$675","$700"],answer:2,explanation:"45 × 5 = $225 per soldier; × 3 = $675 total."},
+      {id:"ar35",section:"AR",question:"If a rifle weighs 8.5 pounds and ammunition adds 1.75 pounds, what is the total weight?",choices:["9.75 lbs","10 lbs","10.25 lbs","10.5 lbs"],answer:2,explanation:"8.5 + 1.75 = 10.25 pounds."},
+      {id:"ar36",section:"AR",question:"A supply depot has 1,200 MREs. If 45 are used per day, how many days until they run out?",choices:["24 days","26 days","27 days","28 days"],answer:1,explanation:"1,200 ÷ 45 = 26.67 → 26 full days."},
+      {id:"ar37",section:"AR",question:"A soldier runs a 12-minute mile pace for 3 miles, then a 10-minute mile pace for 2 miles. Total time:",choices:["56 minutes","54 minutes","52 minutes","50 minutes"],answer:0,explanation:"(12 × 3) + (10 × 2) = 36 + 20 = 56 minutes."},
+      {id:"ar38",section:"AR",question:"A vehicle gets 18 miles per gallon. If fuel costs $4.50 per gallon, what is the cost per mile?",choices:["$0.20","$0.25","$0.30","$0.18"],answer:1,explanation:"$4.50 ÷ 18 = $0.25 per mile."},
+      {id:"ar39",section:"AR",question:"A barracks room is 14 ft by 20 ft. What is the area in square feet?",choices:["248","260","280","300"],answer:2,explanation:"14 × 20 = 280 sq ft."},
+      {id:"ar40",section:"AR",question:"Out of 500 applicants, 35% pass the fitness test. How many pass?",choices:["150","165","175","200"],answer:2,explanation:"500 × 0.35 = 175 applicants."},
+      {id:"ar41",section:"AR",question:"If 2/5 of a battalion of 800 soldiers are deployed, how many remain?",choices:["320","480","560","420"],answer:1,explanation:"2/5 × 800 = 320 deployed; 800 − 320 = 480 remain."},
+      {id:"ar42",section:"AR",question:"A cook prepares meals for 150 people. Each meal requires 0.4 pounds of meat. How many pounds are needed?",choices:["50","55","60","65"],answer:2,explanation:"150 × 0.4 = 60 pounds."},
+      {id:"ar43",section:"AR",question:"A radio signal travels at 186,000 miles per second. How far does it travel in 0.5 seconds?",choices:["62,000 miles","86,000 miles","93,000 miles","186,000 miles"],answer:2,explanation:"186,000 × 0.5 = 93,000 miles."},
+      {id:"ar44",section:"AR",question:"A soldier's pack weighs 65 lbs. After removing 20% of the weight, how much does it weigh?",choices:["48 lbs","50 lbs","52 lbs","55 lbs"],answer:2,explanation:"65 × 0.80 = 52 pounds."},
+      {id:"ar45",section:"AR",question:"If 3 gallons of paint cover 150 sq ft, how many gallons are needed for 400 sq ft?",choices:["6","7","8","9"],answer:2,explanation:"Rate = 50 sq ft/gallon; 400 ÷ 50 = 8 gallons."},
+      {id:"ar46",section:"AR",question:"A radar system rotates 360° in 4 seconds. How many rotations per minute?",choices:["10","12","15","20"],answer:2,explanation:"60 ÷ 4 = 15 rotations per minute."},
+      {id:"ar47",section:"AR",question:"What is 15% of 240?",choices:["30","34","36","42"],answer:2,explanation:"0.15 × 240 = 36."},
+      {id:"ar48",section:"AR",question:"A base is circular with a diameter of 2 miles. What is the approximate area? (Use π ≈ 3.14)",choices:["3.14 sq mi","6.28 sq mi","9.42 sq mi","12.56 sq mi"],answer:0,explanation:"Area = π × r² = 3.14 × 1² = 3.14 square miles."},
+      {id:"ar49",section:"AR",question:"If a soldier earns $32,400 annually and saves 15%, how much is saved per month?",choices:["$365","$385","$405","$425"],answer:2,explanation:"$32,400 × 0.15 = $4,860 / year ÷ 12 = $405/month."},
+      {id:"ar50",section:"AR",question:"A platoon of 40 soldiers must complete a 10-mile march. If they go 2.5 miles per hour, how long will the march take?",choices:["3 hrs","4 hrs","5 hrs","6 hrs"],answer:1,explanation:"10 ÷ 2.5 = 4 hours."}
     ],
     WK: [
       {id:"wk1",section:"WK",question:"DESOLATE most nearly means:",choices:["Cheerful","Creepy","Forlorn","Excited"],answer:2,explanation:"Desolate means deserted or bleak, closest to forlorn."},
@@ -402,7 +486,33 @@
       {id:"wk32",section:"WK",question:"EXECUTE most nearly means:",choices:["Plan","Carry out","Delay","Consider"],answer:1,explanation:"Execute means put a plan or order into effect; carry out."},
       {id:"wk33",section:"WK",question:"HIERARCHY most nearly means:",choices:["Equality","Ranking","Democracy","Chaos"],answer:1,explanation:"Hierarchy means a system of ranking based on authority or status."},
       {id:"wk34",section:"WK",question:"MANDATE most nearly means:",choices:["Request","Suggestion","Order","Opinion"],answer:2,explanation:"Mandate means an official order or commission to do something."},
-      {id:"wk35",section:"WK",question:"PROTOCOL most nearly means:",choices:["Improvisation","Procedure","Disorder","Opinion"],answer:1,explanation:"Protocol means an official procedure or system of rules; standard procedure."}
+      {id:"wk35",section:"WK",question:"PROTOCOL most nearly means:",choices:["Improvisation","Procedure","Disorder","Opinion"],answer:1,explanation:"Protocol means an official procedure or system of rules; standard procedure."},
+      {id:"wk36",section:"WK",question:"PROFICIENT most nearly means:",choices:["Incompetent","Skilled","Learning","Careless"],answer:1,explanation:"Proficient means competent or skilled in doing something."},
+      {id:"wk37",section:"WK",question:"VALOR most nearly means:",choices:["Cowardice","Speed","Bravery","Loyalty"],answer:2,explanation:"Valor means great courage in the face of danger, especially in battle."},
+      {id:"wk38",section:"WK",question:"DEPLOY most nearly means:",choices:["Retreat","Move back","Position strategically","Promote"],answer:2,explanation:"Deploy means to move troops or equipment into position for military action."},
+      {id:"wk39",section:"WK",question:"INTEGRITY most nearly means:",choices:["Dishonesty","Honesty","Weakness","Cleverness"],answer:1,explanation:"Integrity means adherence to moral and ethical principles; honesty."},
+      {id:"wk40",section:"WK",question:"CONCISE most nearly means:",choices:["Long","Wordy","Brief and clear","Confusing"],answer:2,explanation:"Concise means giving much information clearly and in few words."},
+      {id:"wk41",section:"WK",question:"ALLEVIATE most nearly means:",choices:["Worsen","Relieve","Ignore","Complicate"],answer:1,explanation:"Alleviate means to make suffering or a problem less severe; to relieve."},
+      {id:"wk42",section:"WK",question:"FUNDAMENTAL most nearly means:",choices:["Advanced","Secondary","Basic","Optional"],answer:2,explanation:"Fundamental means forming a necessary base; basic and essential."},
+      {id:"wk43",section:"WK",question:"SUBSEQUENT most nearly means:",choices:["Previous","Earlier","Following","Current"],answer:2,explanation:"Subsequent means coming after or following something."},
+      {id:"wk44",section:"WK",question:"ADVERSARY most nearly means:",choices:["Ally","Enemy","Supporter","Partner"],answer:1,explanation:"Adversary means an opponent or enemy, especially in combat or competition."},
+      {id:"wk45",section:"WK",question:"COHERENT most nearly means:",choices:["Confused","Logical","Scattered","Quiet"],answer:1,explanation:"Coherent means logical and consistent; easy to understand."},
+      {id:"wk46",section:"WK",question:"ADEQUATE most nearly means:",choices:["Insufficient","Excellent","Enough","Overwhelming"],answer:2,explanation:"Adequate means satisfactory or acceptable in quality or quantity."},
+      {id:"wk47",section:"WK",question:"PERSEVERE most nearly means:",choices:["Give up","Continue despite difficulty","Fail quickly","Rest often"],answer:1,explanation:"Persevere means to continue in a course of action despite difficulty."},
+      {id:"wk48",section:"WK",question:"TRANSPARENT most nearly means:",choices:["Hidden","Opaque","Open and clear","Secretive"],answer:2,explanation:"Transparent means easily seen through; open and not secretive."},
+      {id:"wk49",section:"WK",question:"DEFICIENT most nearly means:",choices:["Adequate","Excessive","Lacking","Skilled"],answer:2,explanation:"Deficient means not having enough of a specified quality; lacking."},
+      {id:"wk50",section:"WK",question:"COMPLY most nearly means:",choices:["Refuse","Resist","Obey","Question"],answer:2,explanation:"Comply means to act in accordance with a wish or command; to obey."},
+      {id:"wk51",section:"WK",question:"IMPARTIAL most nearly means:",choices:["Biased","Fair","Partisan","Emotional"],answer:1,explanation:"Impartial means treating all rivals or disputants equally; fair and unbiased."},
+      {id:"wk52",section:"WK",question:"VOLATILE most nearly means:",choices:["Stable","Explosive or unpredictable","Calm","Steady"],answer:1,explanation:"Volatile means liable to change rapidly and unpredictably, especially for the worse."},
+      {id:"wk53",section:"WK",question:"COHESION most nearly means:",choices:["Division","Togetherness","Confusion","Conflict"],answer:1,explanation:"Cohesion is the action of forming a united whole; unity and togetherness."},
+      {id:"wk54",section:"WK",question:"APPREHENSIVE most nearly means:",choices:["Confident","Fearful or worried","Excited","Prepared"],answer:1,explanation:"Apprehensive means anxious or fearful that something bad may happen."},
+      {id:"wk55",section:"WK",question:"REDUNDANT most nearly means:",choices:["Necessary","Unique","Unnecessary repetition","Efficient"],answer:2,explanation:"Redundant means not or no longer needed; characterized by unnecessary repetition."},
+      {id:"wk56",section:"WK",question:"SCRUTINIZE most nearly means:",choices:["Ignore","Examine closely","Approve quickly","Overlook"],answer:1,explanation:"Scrutinize means to examine or inspect closely and thoroughly."},
+      {id:"wk57",section:"WK",question:"RELINQUISH most nearly means:",choices:["Claim","Hold tightly","Give up","Demand"],answer:2,explanation:"Relinquish means to voluntarily cease to keep or claim; give up."},
+      {id:"wk58",section:"WK",question:"The mission required COVERT operations.
+COVERT most nearly means:",choices:["Open","Public","Visible","Secret"],answer:3,explanation:"Covert means not openly acknowledged or displayed; secret."},
+      {id:"wk59",section:"WK",question:"TENUOUS most nearly means:",choices:["Strong","Solid","Weak and uncertain","Permanent"],answer:2,explanation:"Tenuous means very weak or slight; lacking substance or solidity."},
+      {id:"wk60",section:"WK",question:"PARAMOUNT most nearly means:",choices:["Unimportant","Secondary","Inferior","Most important"],answer:3,explanation:"Paramount means more important than anything else; supreme."}
     ],
     PC: [
       {id:"pc1",section:"PC",question:"How many main branches does the U.S. military have?",choices:["3","4","5","6"],answer:2,explanation:"The passage states five main branches.",passage:"The United States military consists of five main branches: the Army, Navy, Air Force, Marine Corps, and Coast Guard. Each branch has a distinct mission and set of responsibilities. The Army focuses on land-based operations. The Navy operates at sea and from the sea. The Air Force provides global aerospace power. The Marine Corps specializes in amphibious operations. The Coast Guard protects maritime law enforcement and search and rescue."},
@@ -468,7 +578,22 @@
       {id:"ei17",section:"EI",question:"A transformer is used to:",choices:["Store electricity","Change AC voltage levels","Generate electricity","Measure resistance"],answer:1,explanation:"Transformers step voltage up or down using electromagnetic induction."},
       {id:"ei18",section:"EI",question:"Short circuits are dangerous because they cause:",choices:["Low current","Very high current","Reverse current","Zero voltage"],answer:1,explanation:"Short circuits create a path of near-zero resistance, causing dangerously high current."},
       {id:"ei19",section:"EI",question:"The positive terminal of a battery is marked with:",choices:["A minus sign","A plus sign","The letter N","The letter G"],answer:1,explanation:"The positive terminal is marked with a plus (+) sign."},
-      {id:"ei20",section:"EI",question:"Electrons flow from:",choices:["Positive to negative","Negative to positive","High resistance to low","Ground to power"],answer:1,explanation:"Electrons (negative charges) flow from negative to positive terminals."}
+      {id:"ei20",section:"EI",question:"Electrons flow from:",choices:["Positive to negative","Negative to positive","High resistance to low","Ground to power"],answer:1,explanation:"Electrons (negative charges) flow from negative to positive terminals."},
+      {id:"ei21",section:"EI",question:"An inductor in a circuit is used to:",choices:["Store charge in an electric field","Store energy in a magnetic field","Amplify signals","Convert DC to AC"],answer:1,explanation:"Inductors store energy in a magnetic field when current flows through them."},
+      {id:"ei22",section:"EI",question:"In a series circuit with resistors of 4Ω and 6Ω, total resistance is:",choices:["2.4 Ω","5 Ω","10 Ω","24 Ω"],answer:2,explanation:"Series resistors add: 4 + 6 = 10 Ω."},
+      {id:"ei23",section:"EI",question:"In a parallel circuit with two 10Ω resistors, total resistance is:",choices:["20 Ω","10 Ω","5 Ω","2 Ω"],answer:2,explanation:"Parallel resistors: 1/R = 1/10 + 1/10 = 2/10; R = 5 Ω."},
+      {id:"ei24",section:"EI",question:"Which component converts electrical energy into light?",choices:["Resistor","Capacitor","LED (Light-Emitting Diode)","Transformer"],answer:2,explanation:"An LED (Light-Emitting Diode) converts electrical current into light energy."},
+      {id:"ei25",section:"EI",question:"The ground wire in a household electrical system is typically:",choices:["Red","Black","Green or bare copper","White"],answer:2,explanation:"Ground wires are green or bare copper; white is neutral, black is hot."},
+      {id:"ei26",section:"EI",question:"What is the purpose of a circuit breaker?",choices:["Increase voltage","Store electricity","Automatically stop current flow when overloaded","Convert AC to DC"],answer:2,explanation:"Circuit breakers automatically interrupt circuit flow when current exceeds safe limits."},
+      {id:"ei27",section:"EI",question:"Ohm's Law states P = V × I. If V = 120V and I = 2A, power equals:",choices:["60 W","120 W","180 W","240 W"],answer:3,explanation:"P = 120 × 2 = 240 watts."},
+      {id:"ei28",section:"EI",question:"Semiconductors are materials that:",choices:["Never conduct electricity","Always conduct electricity","Conduct under certain conditions","Are always insulators"],answer:2,explanation:"Semiconductors conduct electricity under certain conditions — the basis of transistors and diodes."},
+      {id:"ei29",section:"EI",question:"What does a voltmeter measure?",choices:["Current","Resistance","Voltage difference","Power"],answer:2,explanation:"A voltmeter measures the electric potential difference (voltage) between two points."},
+      {id:"ei30",section:"EI",question:"Electromagnetic induction is the principle behind:",choices:["Batteries","Generators","Capacitors","Resistors"],answer:1,explanation:"Generators produce electricity by electromagnetic induction — a coil rotating in a magnetic field."},
+      {id:"ei31",section:"EI",question:"Which type of current is produced by most household wall outlets in the U.S.?",choices:["DC at 12V","AC at 120V","DC at 120V","AC at 12V"],answer:1,explanation:"U.S. household outlets supply AC at 120V, 60 Hz."},
+      {id:"ei32",section:"EI",question:"An ohmmeter is used to measure:",choices:["Voltage","Current","Resistance","Power"],answer:2,explanation:"An ohmmeter measures electrical resistance in ohms."},
+      {id:"ei33",section:"EI",question:"What does it mean if two components are 'in series'?",choices:["They share the same voltage","They are in separate branches","They are connected end-to-end in one path","They are not connected"],answer:2,explanation:"Components in series are connected end-to-end, sharing the same current path."},
+      {id:"ei34",section:"EI",question:"A relay is an electrically operated:",choices:["Resistor","Switch","Generator","Battery"],answer:1,explanation:"A relay is an electrically operated switch, often used to control high-power circuits with low-power signals."},
+      {id:"ei35",section:"EI",question:"Static electricity is caused by an imbalance of:",choices:["Neutrons","Protons and electrons (electric charge)","Magnetic poles","Current"],answer:1,explanation:"Static electricity results from an imbalance of positive and negative charges (protons/electrons)."}
     ],
     AS: [
       {id:"as1",section:"AS",question:"The function of the radiator in a car is to:",choices:["Generate power","Cool the engine","Lubricate the engine","Filter the air"],answer:1,explanation:"The radiator dissipates heat from the engine cooling system."},
@@ -495,7 +620,22 @@
       {id:"as22",section:"AS",question:"Sandpaper grit numbers: a lower number means:",choices:["Finer abrasive","Coarser abrasive","Smoother finish","Less abrasion"],answer:1,explanation:"Lower grit numbers (e.g., 40) indicate coarser sandpaper for heavy material removal."},
       {id:"as23",section:"AS",question:"Which of the following is a measuring tool?",choices:["Hammer","Chisel","Vernier caliper","C-clamp"],answer:2,explanation:"A vernier caliper precisely measures dimensions of objects."},
       {id:"as24",section:"AS",question:"The purpose of the timing belt in an engine is to:",choices:["Reduce noise","Synchronize crankshaft and camshaft rotation","Lubricate valves","Power the alternator"],answer:1,explanation:"The timing belt keeps the crankshaft and camshaft in sync for proper valve timing."},
-      {id:"as25",section:"AS",question:"AWG (American Wire Gauge) numbers: a lower number indicates:",choices:["Thinner wire","Thicker wire","Higher resistance","Less current capacity"],answer:1,explanation:"Lower AWG numbers indicate thicker wire with more current capacity."}
+      {id:"as25",section:"AS",question:"AWG (American Wire Gauge) numbers: a lower number indicates:",choices:["Thinner wire","Thicker wire","Higher resistance","Less current capacity"],answer:1,explanation:"Lower AWG numbers indicate thicker wire with more current capacity."},
+      {id:"as26",section:"AS",question:"What is the purpose of the fuel injector?",choices:["Filter fuel","Spray fuel into the combustion chamber","Store fuel","Measure fuel levels"],answer:1,explanation:"Fuel injectors spray precisely measured fuel into the engine's combustion chamber."},
+      {id:"as27",section:"AS",question:"A ratchet wrench is useful because it:",choices:["Adjusts to any size bolt","Allows turning in one direction without repositioning","Measures torque","Works only on hex bolts"],answer:1,explanation:"Ratchet wrenches click in one direction and spin freely the other, allowing faster work."},
+      {id:"as28",section:"AS",question:"Which of the following is used to measure internal engine cylinder dimensions?",choices:["Dial caliper","Bore gauge","Torque wrench","Feeler gauge"],answer:1,explanation:"A bore gauge measures the inside diameter of engine cylinders to check for wear."},
+      {id:"as29",section:"AS",question:"Four-wheel drive (4WD) differs from two-wheel drive (2WD) in that it:",choices:["Uses only front wheels","Powers all four wheels simultaneously","Has a smaller engine","Uses lighter tires"],answer:1,explanation:"4WD powers all four wheels, providing better traction on rough terrain."},
+      {id:"as30",section:"AS",question:"The crankshaft in an engine converts:",choices:["Rotational motion to linear","Linear motion to rotational","Electrical to mechanical energy","Heat to pressure"],answer:1,explanation:"The crankshaft converts up-and-down (linear) piston motion into rotational motion."},
+      {id:"as31",section:"AS",question:"Which type of drill bit is used for drilling into masonry or concrete?",choices:["Twist bit","Spade bit","Masonry bit","Brad point bit"],answer:2,explanation:"Masonry bits have a carbide tip designed to drill into concrete, brick, and stone."},
+      {id:"as32",section:"AS",question:"What does the term 'torque' refer to in automotive applications?",choices:["Top speed","Fuel efficiency","Rotational force","Horsepower output"],answer:2,explanation:"Torque is a rotational force — in engines, it represents the twisting power delivered."},
+      {id:"as33",section:"AS",question:"Antifreeze (coolant) in a car engine serves to:",choices:["Lubricate the engine","Regulate engine temperature year-round","Filter oil","Power the alternator"],answer:1,explanation:"Antifreeze prevents the cooling system from freezing in winter and overheating in summer."},
+      {id:"as34",section:"AS",question:"A hacksaw is best used for cutting:",choices:["Wood","Metal or hard materials","Drywall","Rope"],answer:1,explanation:"Hacksaws have fine teeth designed for cutting metal pipes, bolts, and hard materials."},
+      {id:"as35",section:"AS",question:"What is the role of the camshaft in an engine?",choices:["Ignite the fuel","Control when engine valves open and close","Circulate coolant","Charge the battery"],answer:1,explanation:"The camshaft controls the timing and duration of the engine's intake and exhaust valves."},
+      {id:"as36",section:"AS",question:"Which fastener is specifically designed to resist loosening from vibration?",choices:["Standard nut","Lock nut","Carriage bolt","Wood screw"],answer:1,explanation:"Lock nuts (nylon insert or prevailing torque) resist loosening from vibrations."},
+      {id:"as37",section:"AS",question:"Compression ratio in an engine refers to the ratio of:",choices:["Horsepower to torque","Cylinder volume at BDC vs TDC","Intake to exhaust valve size","Oil to coolant"],answer:1,explanation:"Compression ratio compares the cylinder's maximum volume to its minimum (compressed) volume."},
+      {id:"as38",section:"AS",question:"A cold chisel is used to:",choices:["Measure dimensions","Cut or shape cold metal","Drive screws","Drill holes"],answer:1,explanation:"Cold chisels cut and shape metal when struck with a hammer."},
+      {id:"as39",section:"AS",question:"The main purpose of the exhaust manifold is to:",choices:["Filter air","Collect exhaust gases from cylinders","Cool the engine","Increase compression"],answer:1,explanation:"The exhaust manifold collects exhaust gases from the engine cylinders and routes them to the exhaust pipe."},
+      {id:"as40",section:"AS",question:"A ball-peen hammer differs from a claw hammer in that it has:",choices:["A rubber head","A rounded peen instead of a claw","A longer handle","A magnetic tip"],answer:1,explanation:"Ball-peen hammers have a rounded ball-shaped peen used for metalworking; claw hammers have a nail-pulling claw."}
     ],
     MC: [
       {id:"mc1",section:"MC",question:"A lever can be used to:",choices:["Increase speed only","Multiply force","Reduce gravity","Increase weight"],answer:1,explanation:"Levers multiply applied force, allowing you to lift heavy objects more easily."},
@@ -522,7 +662,22 @@
       {id:"mc22",section:"MC",question:"Power is defined as:",choices:["Force × distance","Work ÷ time","Mass × acceleration","Speed × mass"],answer:1,explanation:"Power = Work ÷ Time. It measures how quickly work is done."},
       {id:"mc23",section:"MC",question:"If an engine produces 300 lb of force and moves a piston 2 feet, the work done is:",choices:["150 ft-lb","302 ft-lb","600 ft-lb","300 ft-lb"],answer:2,explanation:"Work = Force × Distance = 300 × 2 = 600 ft-lb."},
       {id:"mc24",section:"MC",question:"A pulley only changes the direction of force (no mechanical advantage) when it has:",choices:["2 rope segments","3 rope segments","1 rope segment","4 rope segments"],answer:2,explanation:"A single fixed pulley with 1 rope segment only changes direction, no MA gain."},
-      {id:"mc25",section:"MC",question:"Which of the following materials would provide the most resistance to bending?",choices:["Rubber","Wood","Steel I-beam","Aluminum sheet"],answer:2,explanation:"A steel I-beam is specifically designed for high resistance to bending forces."}
+      {id:"mc25",section:"MC",question:"Which of the following materials would provide the most resistance to bending?",choices:["Rubber","Wood","Steel I-beam","Aluminum sheet"],answer:2,explanation:"A steel I-beam is specifically designed for high resistance to bending forces."},
+      {id:"mc26",section:"MC",question:"Which of the following has the greatest mechanical advantage as an inclined plane?",choices:["A steep ramp (45°)","A gradual ramp (10°)","A vertical wall (90°)","A flat surface (0°)"],answer:1,explanation:"A more gradual (lower angle) ramp provides greater mechanical advantage — less force over more distance."},
+      {id:"mc27",section:"MC",question:"If a spring is compressed to half its normal length, the potential energy stored:",choices:["Stays the same","Doubles","Quadruples","Halves"],answer:2,explanation:"Spring PE = ½kx²; halving the length but doubling compression force quadruples the energy stored."},
+      {id:"mc28",section:"MC",question:"A 200-lb weight hangs from a rope looped over two pulleys (block and tackle with 4 rope segments). Force needed:",choices:["25 lb","50 lb","100 lb","200 lb"],answer:1,explanation:"MA = 4 rope segments; 200 ÷ 4 = 50 lb of effort needed."},
+      {id:"mc29",section:"MC",question:"Buoyancy is caused by:",choices:["Water temperature","Difference in pressure above and below an object","Gravity only","An object's color"],answer:1,explanation:"Buoyancy results from the pressure difference between the bottom and top of a submerged object (Archimedes' principle)."},
+      {id:"mc30",section:"MC",question:"When four gears are meshed in a series and Gear 1 rotates clockwise, which direction does Gear 4 rotate?",choices:["Clockwise","Counterclockwise","It doesn't rotate","It depends on gear size"],answer:1,explanation:"Each mesh reverses direction. Gear 1 CW → Gear 2 CCW → Gear 3 CW → Gear 4 CCW. With 3 reversals, Gear 4 is counterclockwise."},
+      {id:"mc31",section:"MC",question:"What is kinetic energy?",choices:["Energy stored in a stretched spring","Energy of a moving object","Heat energy","Electrical energy"],answer:1,explanation:"Kinetic energy is the energy an object possesses due to its motion (KE = ½mv²)."},
+      {id:"mc32",section:"MC",question:"A fulcrum placed closer to the load in a first-class lever:",choices:["Reduces mechanical advantage","Increases mechanical advantage","Has no effect","Increases effort needed"],answer:1,explanation:"Moving the fulcrum closer to the load increases mechanical advantage, requiring less effort."},
+      {id:"mc33",section:"MC",question:"Atmospheric pressure at sea level is approximately:",choices:["10 psi","14.7 psi","20 psi","100 psi"],answer:1,explanation:"Standard atmospheric pressure at sea level is 14.7 psi (pounds per square inch)."},
+      {id:"mc34",section:"MC",question:"A gear with 40 teeth drives a gear with 20 teeth. The output gear's speed compared to input:",choices:["Same speed","Half the speed","Twice the speed","Four times the speed"],answer:2,explanation:"Gear ratio = driver teeth / driven teeth = 40/20 = 2; driven gear rotates twice as fast."},
+      {id:"mc35",section:"MC",question:"Which type of beam can support the most weight without bending?",choices:["Solid square beam","I-beam","Hollow round tube","Flat plate"],answer:1,explanation:"I-beams concentrate material where stress is greatest (top and bottom flanges), maximizing bending resistance."},
+      {id:"mc36",section:"MC",question:"A float valve controls water level in a tank by:",choices:["Using a pump","Rising with water level and shutting off the supply","Measuring water weight","Heating the water"],answer:1,explanation:"A float valve rises with the water level and shuts off the water supply when the desired level is reached."},
+      {id:"mc37",section:"MC",question:"Which of the following is NOT a type of stress on materials?",choices:["Tension","Compression","Luminescence","Shear"],answer:2,explanation:"Tension, compression, shear, torsion, and bending are material stresses. Luminescence is light emission."},
+      {id:"mc38",section:"MC",question:"In hydraulics, a small cylinder with 1 sq inch area connected to a large cylinder with 10 sq inch area: force on large piston if 100 lb applied to small?",choices:["10 lb","100 lb","1,000 lb","10,000 lb"],answer:2,explanation:"Pascal's law: pressure = 100 lb / 1 sq in = 100 psi; force on large piston = 100 × 10 = 1,000 lb."},
+      {id:"mc39",section:"MC",question:"What happens to the speed of a belt drive when the driven pulley is larger than the drive pulley?",choices:["Speed increases","Speed decreases","Speed stays the same","Belt breaks"],answer:1,explanation:"A larger driven pulley rotates slower than the smaller drive pulley (speed reducer)."},
+      {id:"mc40",section:"MC",question:"Torsion is the stress caused by:",choices:["Pulling from opposite ends","Twisting forces","Sideways shearing","Squeezing forces"],answer:1,explanation:"Torsion is the stress caused by a twisting force, like twisting a shaft or bolt."}
     ],
     AO: [
       {id:"ao1",section:"AO",question:"A flat cross-shaped net (plus sign) is folded into a 3D shape. What shape does it form?",choices:["Pyramid","Cylinder","Cube","Cone"],answer:2,explanation:"A cross-shaped net folds into a cube (box)."},
@@ -546,14 +701,14 @@
 
   // ==================== SECTION CONFIG ====================
   const SECTIONS = [
-    {key:"GS",name:"General Science",abbr:"GS",icon:"flask-conical",count:25,time:11,color:"#2563eb",afqt:false},
-    {key:"AR",name:"Arithmetic Reasoning",abbr:"AR",icon:"calculator",count:30,time:36,color:"#e85d04",afqt:true},
-    {key:"WK",name:"Word Knowledge",abbr:"WK",icon:"book-open",count:35,time:11,color:"#e85d04",afqt:true},
+    {key:"GS",name:"General Science",abbr:"GS",icon:"flask-conical",count:50,time:11,color:"#2563eb",afqt:false},
+    {key:"AR",name:"Arithmetic Reasoning",abbr:"AR",icon:"calculator",count:50,time:36,color:"#e85d04",afqt:true},
+    {key:"WK",name:"Word Knowledge",abbr:"WK",icon:"book-open",count:60,time:11,color:"#e85d04",afqt:true},
     {key:"PC",name:"Paragraph Comprehension",abbr:"PC",icon:"file-text",count:15,time:13,color:"#e85d04",afqt:true},
     {key:"MK",name:"Mathematics Knowledge",abbr:"MK",icon:"plus-circle",count:25,time:24,color:"#e85d04",afqt:true},
-    {key:"EI",name:"Electronics Information",abbr:"EI",icon:"zap",count:20,time:9,color:"#7c3aed",afqt:false},
-    {key:"AS",name:"Auto & Shop Information",abbr:"AS",icon:"wrench",count:25,time:11,color:"#b45309",afqt:false},
-    {key:"MC",name:"Mechanical Comprehension",abbr:"MC",icon:"cog",count:25,time:19,color:"#065f46",afqt:false},
+    {key:"EI",name:"Electronics Information",abbr:"EI",icon:"zap",count:35,time:9,color:"#7c3aed",afqt:false},
+    {key:"AS",name:"Auto & Shop Information",abbr:"AS",icon:"wrench",count:40,time:11,color:"#b45309",afqt:false},
+    {key:"MC",name:"Mechanical Comprehension",abbr:"MC",icon:"cog",count:40,time:19,color:"#065f46",afqt:false},
     {key:"AO",name:"Assembling Objects",abbr:"AO",icon:"puzzle",count:16,time:15,color:"#1d4ed8",afqt:false}
   ];
 
@@ -600,6 +755,9 @@
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     const el = document.getElementById(id);
     if (el) { el.classList.add('active'); el.scrollTop = 0; window.scrollTo(0,0); }
+    var floatBtn = document.getElementById('float-speaker');
+    if (floatBtn) floatBtn.style.display = (id === 'quiz-screen') ? 'flex' : 'none';
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
   }
 
   function formatTime(sec) {
@@ -824,7 +982,38 @@
     document.getElementById('next-btn').style.display = 'none';
     document.getElementById('skip-btn').style.display = 'flex';
 
+    // WK vocab word highlighting + inline speaker
+    if (q.section === 'WK') {
+      var qtEl = document.getElementById('question-text');
+      var qtText = q.question;
+      var capsMatch = qtText.match(/\b([A-Z]{3,})\b/);
+      if (capsMatch) {
+        var word = capsMatch[1];
+        var safeWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        qtEl.innerHTML = qtText.replace(new RegExp('\\b' + safeWord + '\\b'),
+          '<span class="wk-word" id="wk-vocab-word" title="Tap to hear pronunciation">' + word + ' 🔊</span>');
+        var wkSpan = document.getElementById('wk-vocab-word');
+        if (wkSpan) {
+          wkSpan.addEventListener('click', function(e) {
+            e.stopPropagation();
+            speak(word, 0.7);
+          });
+        }
+      }
+    }
+
     reInitIcons();
+
+    // Speaker button handlers
+    var speakerBtn = document.getElementById('quiz-speaker-btn');
+    if (speakerBtn) {
+      speakerBtn.onclick = function() { speakCurrentQuestion(); };
+    }
+    var floatBtn = document.getElementById('float-speaker');
+    if (floatBtn) {
+      floatBtn.style.display = document.getElementById('quiz-screen').classList.contains('active') ? 'flex' : 'none';
+      floatBtn.onclick = function() { speakCurrentQuestion(); };
+    }
 
     // Choice click handlers
     container.querySelectorAll('.choice-btn').forEach(btn => {
@@ -1094,5 +1283,6 @@
     document.getElementById('mobile-menu-home').classList.add('hidden');
   });
   </script>
+  <button id="float-speaker" class="float-speaker" title="Read question aloud" aria-label="Speak question">🔊</button>
 </body>
 </html>
