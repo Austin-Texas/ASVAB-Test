@@ -68,6 +68,19 @@
     @keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
     .slide-up { animation: slideUp .5s ease-out forwards; }
     .kb-hint { font-size:10px; color:#64748b; border:1px solid #3a4163; border-radius:4px; padding:1px 5px; margin-left:4px; }
+
+
+    /* Voice Selector */
+    .voice-panel { background:#1a1e2e; border:1px solid #2f3550; border-radius:16px; padding:12px 14px; margin-bottom:12px; }
+    .voice-btn { display:flex; align-items:center; gap:6px; padding:6px 12px; border-radius:999px; border:2px solid #2f3550; background:#252a3d; color:#94a3b8; font-size:12px; font-weight:600; cursor:pointer; transition:all .2s; white-space:nowrap; }
+    .voice-btn:hover { border-color:#c8a84b; color:#c8a84b; }
+    .voice-btn.active-voice { border-color:#4a9c59; background:rgba(74,156,89,.15); color:#4a9c59; }
+    .speed-btn { display:flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:50%; border:2px solid #2f3550; background:#252a3d; color:#94a3b8; font-size:11px; font-weight:700; cursor:pointer; transition:all .2s; }
+    .speed-btn:hover { border-color:#c8a84b; color:#c8a84b; }
+    .speed-btn.active-speed { border-color:#c8a84b; background:rgba(200,168,75,.15); color:#c8a84b; }
+    /* Section Icons */
+    .section-icon-badge { display:flex; align-items:center; gap:8px; padding:6px 14px; border-radius:999px; font-size:13px; font-weight:700; margin-bottom:12px; width:fit-content; }
+    .section-icon-badge .icon-emoji { font-size:20px; line-height:1; }
     /* TTS Speaker Buttons */
     .speaker-btn { display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:#252a3d;border:2px solid #c8a84b;color:#c8a84b;cursor:pointer;transition:all .2s ease;flex-shrink:0;padding:0; }
     .speaker-btn:hover { background:#c8a84b;color:#1a1e2e; }
@@ -220,6 +233,10 @@
       <div data-id="78" id="question-card" class="bg-base-700 rounded-2xl p-6 md:p-8 mb-6 border border-base-600">
         <p data-id="79" id="question-number-label" class="text-xs font-bold uppercase text-mil-gold mb-3 tracking-wide"></p>
         <p data-id="80" id="question-text" class="text-lg md:text-xl font-semibold text-txt-100 leading-relaxed"></p>
+        <!-- Section icon badge -->
+        <div id="section-icon-badge" class="section-icon-badge"></div>
+        <!-- Voice selector panel -->
+        <div id="voice-selector-panel" class="voice-panel"></div>
         <!-- Diagram for AO/MC shape questions -->
         <div id="diagram-container" style="display:none;margin-top:12px"></div>
         <!-- Passage block for PC questions -->
@@ -319,34 +336,131 @@
   </div>
 
   <script>
-  // ==================== TEXT-TO-SPEECH ====================
-  function speak(text, rate) {
-    rate = rate || 1.0;
+
+  // ==================== SECTION ICONS ====================
+  const SECTION_ICONS = {
+    GS: { emoji: '🔬', label: 'General Science',       color: '#2563eb', bg: 'rgba(37,99,235,.15)' },
+    AR: { emoji: '🧮', label: 'Arithmetic Reasoning',  color: '#e85d04', bg: 'rgba(232,93,4,.15)'  },
+    WK: { emoji: '📖', label: 'Word Knowledge',        color: '#e85d04', bg: 'rgba(232,93,4,.15)'  },
+    PC: { emoji: '📝', label: 'Paragraph Comprehension', color: '#e85d04', bg: 'rgba(232,93,4,.15)' },
+    MK: { emoji: '📐', label: 'Mathematics Knowledge', color: '#e85d04', bg: 'rgba(232,93,4,.15)'  },
+    EI: { emoji: '⚡', label: 'Electronics Information', color: '#7c3aed', bg: 'rgba(124,58,237,.15)' },
+    AS: { emoji: '🔧', label: 'Auto & Shop Info',      color: '#b45309', bg: 'rgba(180,83,9,.15)'  },
+    MC: { emoji: '⚙️', label: 'Mechanical Comprehension', color: '#065f46', bg: 'rgba(6,95,70,.15)'  },
+    AO: { emoji: '🔷', label: 'Assembling Objects',    color: '#1d4ed8', bg: 'rgba(29,78,216,.15)'  },
+  };
+
+  // ==================== MULTI-VOICE TTS ====================
+  let ttsVoices = [];
+  let selectedVoice = null;
+  let ttsRate = 1.0;
+  let ttsPitch = 1.0;
+
+  function loadVoices() {
+    ttsVoices = window.speechSynthesis.getVoices();
+    populateVoicePanel();
+  }
+
+  if (window.speechSynthesis) {
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    setTimeout(loadVoices, 500);
+  }
+
+  const VOICE_PRESETS = [
+    { id: 'female-us',  label: '👩 Female (US)',   lang: 'en-US', preferFemale: true  },
+    { id: 'male-us',    label: '👨 Male (US)',     lang: 'en-US', preferFemale: false },
+    { id: 'female-uk',  label: '👩 Female (UK)',   lang: 'en-GB', preferFemale: true  },
+    { id: 'male-uk',    label: '👨 Male (UK)',     lang: 'en-GB', preferFemale: false },
+    { id: 'female-au',  label: '👩 Female (AU)',   lang: 'en-AU', preferFemale: true  },
+    { id: 'auto',       label: '🔊 Auto',          lang: null,    preferFemale: null  },
+  ];
+
+  function findVoice(preset) {
+    if (preset.id === 'auto' || !ttsVoices.length) return null;
+    let matches = ttsVoices.filter(v => v.lang && v.lang.startsWith(preset.lang.split('-')[0]));
+    if (matches.length === 0) matches = ttsVoices;
+    // Try to find gender match by name keywords
+    const femaleWords = ['female','zira','samantha','karen','moira','tessa','victoria','fiona','allison','ava','susan','kate','helen','eva'];
+    const maleWords = ['male','david','mark','daniel','rishi','lee','james','alex','fred','tom','oliver'];
+    if (preset.preferFemale === true) {
+      let f = matches.find(v => femaleWords.some(w => v.name.toLowerCase().includes(w)));
+      if (f) return f;
+    } else if (preset.preferFemale === false) {
+      let m = matches.find(v => maleWords.some(w => v.name.toLowerCase().includes(w)));
+      if (m) return m;
+    }
+    // Fallback: pick by lang
+    let langMatch = ttsVoices.find(v => v.lang === preset.lang);
+    return langMatch || matches[0] || null;
+  }
+
+  let activeVoiceId = 'auto';
+  const SPEED_OPTIONS = [
+    { id: 's-slow', label: '0.7×', rate: 0.7 },
+    { id: 's-norm', label: '1.0×', rate: 1.0 },
+    { id: 's-fast', label: '1.3×', rate: 1.3 },
+  ];
+  let activeSpeedId = 's-norm';
+
+  function populateVoicePanel() {
+    const panel = document.getElementById('voice-selector-panel');
+    if (!panel) return;
+    let html = '<div style="font-size:11px;color:#64748b;margin-bottom:8px;font-weight:700;letter-spacing:.05em">🗣️ VOICE</div>';
+    html += '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">';
+    VOICE_PRESETS.forEach(p => {
+      const isActive = p.id === activeVoiceId;
+      html += `<button class="voice-btn${isActive?' active-voice':''}" data-voice-id="${p.id}" onclick="setVoice('${p.id}')">${p.label}</button>`;
+    });
+    html += '</div>';
+    html += '<div style="font-size:11px;color:#64748b;margin-bottom:8px;font-weight:700;letter-spacing:.05em">⚡ SPEED</div>';
+    html += '<div style="display:flex;gap:8px">';
+    SPEED_OPTIONS.forEach(s => {
+      const isActive = s.id === activeSpeedId;
+      html += `<button class="speed-btn${isActive?' active-speed':''}" data-speed-id="${s.id}" onclick="setSpeed('${s.id}')">${s.label}</button>`;
+    });
+    html += '</div>';
+    panel.innerHTML = html;
+  }
+
+  function setVoice(id) {
+    activeVoiceId = id;
+    const preset = VOICE_PRESETS.find(p => p.id === id);
+    selectedVoice = preset ? findVoice(preset) : null;
+    populateVoicePanel();
+  }
+
+  function setSpeed(id) {
+    activeSpeedId = id;
+    const s = SPEED_OPTIONS.find(x => x.id === id);
+    ttsRate = s ? s.rate : 1.0;
+    populateVoicePanel();
+  }
+
+  function speak(text, forceRate) {
+    const rate = forceRate || ttsRate;
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
-    var utt = new SpeechSynthesisUtterance(text);
+    const utt = new SpeechSynthesisUtterance(text);
     utt.rate = rate;
     utt.pitch = 1.0;
     utt.volume = 1.0;
     utt.lang = 'en-US';
-    utt.onstart = function() {
-      document.querySelectorAll('.speaker-btn,.float-speaker').forEach(function(b){b.classList.add('speaking');});
-    };
-    utt.onend = utt.onerror = function() {
-      document.querySelectorAll('.speaker-btn,.float-speaker').forEach(function(b){b.classList.remove('speaking');});
-    };
+    if (selectedVoice) utt.voice = selectedVoice;
+    utt.onstart = () => document.querySelectorAll('.speaker-btn,.float-speaker').forEach(b => b.classList.add('speaking'));
+    utt.onend = utt.onerror = () => document.querySelectorAll('.speaker-btn,.float-speaker').forEach(b => b.classList.remove('speaking'));
     window.speechSynthesis.speak(utt);
   }
 
   function speakCurrentQuestion() {
     if (!state.questions || state.currentQ === undefined) return;
-    var q = state.questions[state.currentQ];
+    const q = state.questions[state.currentQ];
     if (!q) return;
-    var text = q.question;
+    let text = q.question;
     if (q.passage) text = 'Passage: ' + q.passage + '. Question: ' + q.question;
-    speak(text, 0.9);
+    speak(text);
   }
 
+  // ==================== TEXT-TO-SPEECH ====================
 
   // ==================== DIAGRAMS ====================
   const DIAGRAMS = {
