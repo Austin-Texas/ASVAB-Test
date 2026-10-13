@@ -1161,6 +1161,7 @@
     // Question
     document.getElementById('question-number-label').textContent = `Question ${cur}`;
     document.getElementById('question-text').textContent = q.question;
+    if (typeof window.renderASVABQuestionVisual === 'function') window.renderASVABQuestionVisual();
 
     // Passage
     const pb = document.getElementById('passage-block');
@@ -1545,25 +1546,34 @@
     };
     const question = document.getElementById('question-text');
     if (!question) return;
-    let lastTopic = '';
     function updateBadge() {
       const text = (question.textContent || '').toLowerCase();
-      const match = rules.find(([pattern]) => pattern.test(text));
-      const active = typeof state !== 'undefined' && state.currentSection
-        ? state.currentSection.key : window.currentSection || window.activeSection || '';
-      const section = String(active).toUpperCase().slice(0, 2);
-      const topic = match ? match[1] : defaults[section] || 'book';
-      if (topic === lastTopic && document.getElementById('__qbadge')) return;
-      lastTopic = topic;
+      const activeSection = document.getElementById('quiz-section-badge');
+      const section = (activeSection ? activeSection.textContent : '').trim().toUpperCase();
+      const isFold = /fold(ed|ing)? diagonally|square piece of paper.*cut|cut along the fold/i.test(text);
+      const matched = rules.find(([pattern]) => pattern.test(text));
+      const topic = matched ? matched[1] : (defaults[section] || 'book');
       let badge = document.getElementById('__qbadge');
       if (!badge) {
         badge = document.createElement('div');
         badge.id = '__qbadge';
-        badge.style.cssText = 'display:flex;justify-content:center;align-items:center;margin:0 0 12px;user-select:none';
         question.parentNode.insertBefore(badge, question);
       }
+      badge.style.cssText = 'display:flex!important;visibility:visible!important;justify-content:center;align-items:center;margin:12px 0 18px;min-height:132px;user-select:none';
+      if (isFold) {
+        badge.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 160" width="420" height="160" role="img" aria-label="Square folded diagonally and cut into two triangles" style="max-width:100%;height:auto">'
+         + '<defs><linearGradient id="paper-surface" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#bce9ff"/><stop offset="1" stop-color="#368bd5"/></linearGradient></defs>'
+         + '<path d="M30 28h108v108H30z" fill="url(#paper-surface)" stroke="#93c5fd" stroke-width="3"/>'
+         + '<path d="M30 28l108 108" stroke="#facc15" stroke-width="4" stroke-dasharray="7 6"/>'
+         + '<path d="m165 83 35 0m-12-10 12 10-12 10" fill="none" stroke="#f8fafc" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>'
+         + '<path d="M230 29v107h105z" fill="#34d399" fill-opacity=".9" stroke="#99f6e4" stroke-width="3"/>'
+         + '<path d="M274 29h105v107z" fill="#60a5fa" fill-opacity=".9" stroke="#bfdbfe" stroke-width="3"/>'
+         + '<text x="83" y="151" fill="#cbd5e1" font-size="11" text-anchor="middle">Diagonal cut</text>'
+         + '<text x="305" y="151" fill="#cbd5e1" font-size="11" text-anchor="middle">Two triangles</text></svg>';
+        return;
+      }
       const safeId = 'qb-' + topic;
-      badge.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="110" height="110" viewBox="0 0 120 120" role="img" aria-label="' + topic + ' illustration" style="max-width:100%;filter:drop-shadow(0 9px 8px rgba(0,0,0,.33))">'
+      badge.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="124" height="124" viewBox="0 0 120 120" role="img" aria-label="' + topic + ' illustration" style="max-width:100%;filter:drop-shadow(0 9px 8px rgba(0,0,0,.33))">'
         + '<defs><linearGradient id="' + safeId + '-bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#475569"/><stop offset=".45" stop-color="#273449"/><stop offset="1" stop-color="#111827"/></linearGradient>'
         + '<linearGradient id="' + safeId + '-ink" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f8fafc"/><stop offset=".45" stop-color="#67e8f9"/><stop offset="1" stop-color="#0ea5e9"/></linearGradient></defs>'
         + '<rect x="8" y="10" width="104" height="104" rx="26" fill="url(#' + safeId + '-bg)" stroke="#738399" stroke-width="1.5"/>'
@@ -1571,6 +1581,7 @@
         + '<g fill="none" stroke="url(#' + safeId + '-ink)" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">'
         + (drawings[topic] || drawings.book) + '</g></svg>';
     }
+    window.renderASVABQuestionVisual = updateBadge;
     new MutationObserver(updateBadge).observe(question, {childList:true, characterData:true, subtree:true});
     setTimeout(updateBadge, 300);
   })();
