@@ -98,6 +98,9 @@
     #skip-btn { background:#3b4963; color:#f8fafc; border:1px solid #8495b3; opacity:1; }
     #skip-btn:hover, #skip-btn:focus-visible { background:#516481; border-color:#cbd5e1; color:#fff; }
     #skip-btn svg, #skip-btn i { color:inherit; opacity:1; }
+    .branch-choice {background:#252a3d;color:#cbd5e1;border-color:#3a4163;transition:background .15s,border-color .15s;}
+    .branch-choice:hover,.branch-choice:focus-visible {border-color:#dbbe6a;color:white;}
+    .branch-choice.is-selected {background:#294734;color:#f0fdf4;border-color:#5cb86d;}
   </style>
 </head>
 <body data-id="0" class="min-h-screen">
@@ -166,9 +169,30 @@
             <i data-id="41" data-lucide="clock" class="w-6 h-6 text-mil-gold group-hover:text-mil-goldlt"></i>
             <h3 data-id="42" class="text-lg font-bold uppercase text-txt-100">Full Practice Test</h3>
           </div>
-          <p data-id="43" class="text-sm text-txt-300">All 9 sections with real ASVAB time limits. 356+ questions total.</p>
+          <p data-id="43" class="text-sm text-txt-300">Practice across all sections using the test format selected below. Official-style modes use approximate practice questions.</p>
         </button>
       </div>
+
+
+      <!-- Military branch / testing format selection -->
+      <section id="military-prep-panel" class="max-w-5xl mx-auto mb-8 rounded-2xl bg-base-800 border border-base-600 p-5 md:p-6" aria-label="Choose military service and practice test format">
+        <h2 class="text-xl font-extrabold text-txt-100 mb-2">Prepare for your military branch</h2>
+        <p class="text-sm text-txt-300 mb-4">One ASVAB for every service. Choose your branch to see career-score guidance, then choose how to practice.</p>
+        <div id="military-branches" class="grid grid-cols-2 md:grid-cols-3 gap-2 mb-4"></div>
+        <p id="branch-detail" class="text-sm text-txt-200 rounded-xl bg-base-700 p-3 mb-5" aria-live="polite"></p>
+        <label for="test-format" class="block text-sm font-bold text-mil-gold mb-2">Full-test format</label>
+        <select id="test-format" class="w-full rounded-xl bg-base-700 text-txt-100 border border-base-500 p-3 mb-3">
+          <option value="bank">Question Bank Practice - all available questions</option>
+          <option value="paper">Paper-ASVAB style - official subtest counts and clocks where bank permits</option>
+          <option value="cat">CAT-ASVAB inspired - timed, one-way, no answer feedback</option>
+        </select>
+        <p id="format-description" class="text-xs text-txt-300 leading-relaxed"></p>
+        <p class="text-xs text-txt-400 mt-3">Independent educational practice tool. Not affiliated with, endorsed by, or equivalent to official MEPS/MET testing. Scores are raw practice percentages, not official AFQT percentiles or service line scores.</p>
+        <div class="flex flex-wrap gap-4 mt-3 text-xs">
+          <a class="text-mil-gold underline" href="https://www.officialasvab.com/applicants/what-to-expect/" target="_blank" rel="noopener noreferrer">Official ASVAB testing details</a>
+          <a class="text-mil-gold underline" href="https://www.officialasvab.com/applicants/military-jobs/" target="_blank" rel="noopener noreferrer">Official career-score information</a>
+        </div>
+      </section>
 
       <!-- Study Mode Toggle -->
       <div data-id="44" class="flex items-center justify-center gap-3 mb-8">
@@ -870,12 +894,54 @@
     {key:"AO",name:"Assembling Objects",abbr:"AO",icon:"puzzle",count:16,time:15,color:"#1d4ed8",afqt:false}
   ];
 
+
+  // ASVAB official format references: officialasvab.com/applicants/what-to-expect/
+  const MILITARY_BRANCHES = [
+    {key:'army',name:'Army',focus:'Army MOS eligibility uses AFQT and Army line-score composites. Review technical, mechanical and verbal skills relevant to your intended MOS.'},
+    {key:'airforce',name:'Air Force',focus:'Air Force careers use MAGE aptitude areas: Mechanical, Administrative, General and Electronics. Exact job qualifications vary.'},
+    {key:'navy',name:'Navy',focus:'Navy ratings use rating-specific ASVAB line-score combinations. Requirements depend on the selected rating.'},
+    {key:'marines',name:'Marine Corps',focus:'Marine Corps MOS assignments use ASVAB composite/line scores in addition to enlistment eligibility.'},
+    {key:'coastguard',name:'Coast Guard',focus:'Coast Guard enlistment and ratings use AFQT and rating-specific ASVAB qualification rules.'},
+    {key:'spaceforce',name:'Space Force',focus:'Space Force applicants use ASVAB qualification rules for enlisted careers, with technical aptitude important for many specialties.'}
+  ];
+  const OFFICIAL_FORMATS = {
+    paper: {GS:[25,11],AR:[30,36],WK:[35,11],PC:[15,13],MK:[25,24],EI:[20,9],AS:[25,11],MC:[25,19],AO:[25,15]},
+    // Official CAT separates AI (10,7m) and SI (10,6m). This bank has a single AS section;
+    // combine their limits transparently instead of pretending to administer the official CAT.
+    cat: {GS:[15,12],AR:[15,55],WK:[15,9],PC:[10,27],MK:[15,31],EI:[15,10],AS:[20,13],MC:[15,22],AO:[15,18]}
+  };
+  let chosenBranch = 'army';
+  let chosenFormat = 'bank';
+  function updateBranchPanel(){
+    const grid = document.getElementById('military-branches');
+    if(!grid)return;
+    grid.innerHTML = '';
+    MILITARY_BRANCHES.forEach(b=>{
+      const btn = document.createElement('button');
+      btn.type='button';
+      btn.className='branch-choice rounded-xl border px-3 py-3 font-semibold text-sm '+(chosenBranch===b.key?'is-selected':'');
+      btn.textContent=b.name;
+      btn.setAttribute('aria-pressed', String(chosenBranch===b.key));
+      btn.addEventListener('click',()=>{chosenBranch=b.key;updateBranchPanel();});
+      grid.appendChild(btn);
+    });
+    document.getElementById('branch-detail').textContent=MILITARY_BRANCHES.find(b=>b.key===chosenBranch).focus+' ASVAB question content is common to every branch.';
+    const descriptions={
+      bank:'All available practice questions with existing section clocks. Study mode can show corrections. This is not the official administered ASVAB.',
+      paper:'Paper-ASVAB style: official subtest question-count targets and time limits (225 questions / 149 minutes on the actual paper test). Sections with too few existing questions use what is available. Test difficulty and scores are not calibrated.',
+      cat:'CAT-ASVAB inspired: official scored-question targets and subtest clocks without tryout questions; answers lock, no skipping or immediate feedback. Auto & Shop remain combined (AI and SI are separate on the real CAT). Question selection is shuffled, NOT psychometrically adaptive.'
+    };
+    document.getElementById('format-description').textContent=descriptions[chosenFormat];
+    document.getElementById('test-format').value=chosenFormat;
+  }
+
   // ==================== STATE ====================
   let state = {
     screen: 'home',
     studyMode: false,
     currentSection: null,
     fullTest: false,
+    simulatedExam: false,
     fullTestSections: [],
     fullTestIndex: 0,
     questions: [],
@@ -1003,6 +1069,7 @@
     if (!sect) return;
     state.currentSection = sect;
     state.fullTest = false;
+    state.simulatedExam = false;
     state.questions = shuffle([...QUESTIONS[sectionKey]]);
     state.currentQ = 0;
     state.correctCount = 0;
@@ -1018,6 +1085,13 @@
   }
 
   function startFullTest() {
+    chosenFormat = document.getElementById('test-format').value;
+    state.simulatedExam = chosenFormat !== 'bank';
+    if (state.simulatedExam) {
+      state.studyMode = false;
+      document.getElementById('study-toggle-btn').classList.remove('on');
+      document.getElementById('study-toggle-btn').setAttribute('aria-checked', 'false');
+    }
     state.fullTest = true;
     state.fullTestSections = SECTIONS.map(s => s.key);
     state.fullTestIndex = 0;
@@ -1035,11 +1109,13 @@
     const sect = SECTIONS.find(s => s.key === sKey);
     state.currentSection = sect;
     state.fullTestIndex = idx;
-    state.questions = shuffle([...QUESTIONS[sKey]]);
+    const format = OFFICIAL_FORMATS[chosenFormat];
+    const pool = shuffle([...QUESTIONS[sKey]]);
+    state.questions = format ? pool.slice(0, format[sKey][0]) : pool;
     state.currentQ = 0;
     state.correctCount = 0;
     state.answered = false;
-    state.totalTime = sect.time * 60;
+    state.totalTime = (OFFICIAL_FORMATS[chosenFormat] ? OFFICIAL_FORMATS[chosenFormat][sKey][1] : sect.time) * 60;
     state.timeRemaining = state.totalTime;
 
     showScreen('quiz-screen');
@@ -1138,7 +1214,7 @@
     // Hide explanation & next
     document.getElementById('explanation-box').classList.add('hidden');
     document.getElementById('next-btn').style.display = 'none';
-    document.getElementById('skip-btn').style.display = 'flex';
+    document.getElementById('skip-btn').style.display = state.simulatedExam ? 'none' : 'flex';
 
     // WK vocab word highlighting + inline speaker
     if (q.section === 'WK') {
@@ -1191,6 +1267,14 @@
     const isCorrect = idx === correct;
 
     if (isCorrect) state.correctCount++;
+    if (state.simulatedExam) {
+      // Simulate proctored exams: no immediate correctness, answer changes, or skip.
+      document.querySelectorAll('.choice-btn').forEach(btn=>{btn.classList.add('answered');btn.disabled=true;});
+      document.getElementById('explanation-box').classList.add('hidden');
+      document.getElementById('skip-btn').style.display='none';
+      document.getElementById('next-btn').style.display='flex';
+      return;
+    }
 
     // Highlight choices
     const btns = document.querySelectorAll('.choice-btn');
@@ -1226,7 +1310,7 @@
   }
 
   function skipQuestion() {
-    if (state.answered) return;
+    if (state.simulatedExam || state.answered) return;
     state.currentQ++;
     if (state.currentQ >= state.questions.length) {
       endQuiz();
@@ -1324,6 +1408,8 @@
     else if (pct >= 70) msg.textContent = "Solid work on the full test, Brian! Focus on weaker sections.";
     else msg.textContent = "Keep studying, Brian. Review the section breakdown below.";
 
+    msg.textContent = 'Practice accuracy: '+pct+'%. This is not an AFQT percentile or certified enlistment/job eligibility score. Review your per-section performance below.';
+
     // Section breakdown table
     const breakdown = document.getElementById('section-breakdown');
     breakdown.classList.remove('hidden');
@@ -1374,10 +1460,13 @@
   }
 
   // Initialize home
+  document.getElementById('test-format').addEventListener('change',e=>{chosenFormat=e.target.value;updateBranchPanel();});
+  updateBranchPanel();
   renderHome();
 
   // Study mode toggle
   document.getElementById('study-toggle-btn').addEventListener('click', function() {
+    if(chosenFormat !== 'bank') {chosenFormat='bank';updateBranchPanel();}
     state.studyMode = !state.studyMode;
     this.classList.toggle('on', state.studyMode);
     this.setAttribute('aria-checked', state.studyMode ? 'true' : 'false');
