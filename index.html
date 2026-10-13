@@ -400,41 +400,30 @@
 
   // ==================== AMERICAN FEMALE VOICE ONLY ====================
   let selectedVoice = null;
-  let ttsRate = 1.0;
-  const US_FEMALE_NAMES = ['aria','jenny','zira','samantha','ava','allison','susan','victoria','kendra','kimberly','salli','joanna','ivy','female'];
+  let ttsRate = 0.94;
+  const preferredUSFemaleVoices = ['microsoft aria','microsoft jenny','google us english female','samantha','ava','zira','allison','victoria','kendra','kimberly','salli','joanna','ivy'];
   function loadVoices() {
     if (!window.speechSynthesis) return;
-    const usVoices = window.speechSynthesis.getVoices().filter(v => /^en[-_]US$/i.test(v.lang));
-    selectedVoice = usVoices.find(v => US_FEMALE_NAMES.some(n => v.name.toLowerCase().includes(n))) || usVoices[0] || null;
-    populateVoicePanel();
+    const voices = window.speechSynthesis.getVoices().filter(v => /^en[-_]US$/i.test(v.lang));
+    selectedVoice = voices.find(v => preferredUSFemaleVoices.some(name => v.name.toLowerCase().includes(name))) || voices[0] || null;
   }
   if (window.speechSynthesis) {
     window.speechSynthesis.addEventListener('voiceschanged', loadVoices);
-    setTimeout(loadVoices, 300);
+    setTimeout(loadVoices, 200);
   }
-  function populateVoicePanel() {
-    const panel = document.getElementById('voice-selector-panel');
-    if (!panel) return;
-    panel.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">'
-      + '<span style="font-size:12px;color:#cbd5e1;font-weight:700">American English - Female Voice</span>'
-      + '<button type="button" id="us-voice-read-btn" class="voice-btn active-voice" aria-label="Read question aloud in American English">Read Question Aloud</button>'
-      + '</div>';
-    document.getElementById('us-voice-read-btn').addEventListener('click', speakCurrentQuestion);
-  }
-
   function speak(text, forceRate) {
-    const rate = forceRate || ttsRate;
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
-    const utt = new SpeechSynthesisUtterance(text);
-    utt.rate = rate;
-    utt.pitch = 1.0;
-    utt.volume = 1.0;
-    utt.lang = 'en-US';
     if (!selectedVoice) loadVoices();
+    const utt = new SpeechSynthesisUtterance(String(text || '').replace(/\\s+/g, ' ').trim());
+    utt.rate = forceRate || ttsRate;
+    utt.pitch = 1.04;
+    utt.volume = 1;
+    utt.lang = 'en-US';
     if (selectedVoice) utt.voice = selectedVoice;
-    utt.onstart = () => document.querySelectorAll('.speaker-btn,.float-speaker').forEach(b => b.classList.add('speaking'));
-    utt.onend = utt.onerror = () => document.querySelectorAll('.speaker-btn,.float-speaker').forEach(b => b.classList.remove('speaking'));
+    const buttons = () => document.querySelectorAll('.speaker-btn,.float-speaker');
+    utt.onstart = () => buttons().forEach(b => b.classList.add('speaking'));
+    utt.onend = utt.onerror = () => buttons().forEach(b => b.classList.remove('speaking'));
     window.speechSynthesis.speak(utt);
   }
 
