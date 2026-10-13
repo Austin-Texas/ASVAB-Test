@@ -1490,7 +1490,92 @@
     document.getElementById('mobile-menu-home').classList.add('hidden');
   });
   </script>
-  <!-- Removed conflicting whole-page mutation observers that caused browser freezing. -->
+  <script id="question-svg-icons">
+  (function () {
+    'use strict';
+    // Self-contained SVG icon artwork. No emoji, image assets, or additional libraries.
+    const rules = [
+      [/doorknob|wheel.and.axle|axle/i, 'gear'],
+      [/lever|fulcrum/i, 'balance'],
+      [/pulley/i, 'pulley'],
+      [/planet|orbit|solar/i, 'planet'],
+      [/atom|electron|proton/i, 'atom'],
+      [/cell|dna|gene/i, 'dna'],
+      [/heart|blood|artery/i, 'heart'],
+      [/brain|nerve|neuron/i, 'brain'],
+      [/circuit|voltage|resistance|ohm/i, 'bolt'],
+      [/engine|piston|combustion/i, 'engine'],
+      [/gear|transmission|torque/i, 'gear'],
+      [/wrench|bolt|fastener/i, 'tool'],
+      [/hammer|nail|drill/i, 'hammer'],
+      [/chemical|molecule|compound/i, 'flask'],
+      [/temperature|heat|thermal/i, 'thermometer'],
+      [/speed|velocity|acceleration/i, 'speed'],
+      [/fraction|decimal|percent/i, 'math'],
+      [/triangle|angle|geometry/i, 'geometry'],
+      [/synonym|antonym|definition/i, 'book'],
+      [/passage|paragraph|author/i, 'document'],
+      [/object|assemble|shape/i, 'puzzle'],
+      [/math|equation|algebra/i, 'math']
+    ];
+    const defaults = {GS:'flask', AR:'math', WK:'book', PC:'document', MK:'geometry',
+      EI:'bolt', AS:'tool', MC:'gear', AO:'puzzle'};
+    // Line drawings are placed over a shaded, beveled 3D-style SVG tile.
+    const drawings = {
+      gear:'<circle cx="60" cy="60" r="21"/><circle cx="60" cy="60" r="8"/><path d="M60 25v10m0 50v10M25 60h10m50 0h10M35 35l8 8m34 34 8 8m0-50-8 8M43 77l-8 8"/>',
+      balance:'<path d="M60 27v62m-20 4h40M29 44h62M60 32l-6-7h12zM38 44l-14 26h28zM82 44L68 70h28z"/><path d="M21 74h34m10 0h34"/>',
+      pulley:'<circle cx="60" cy="42" r="18"/><circle cx="60" cy="42" r="6"/><path d="M42 42v49h15m21-49v49H64m-7-7 7 7-7 7M64 84l-7 7 7 7"/>',
+      planet:'<circle cx="60" cy="60" r="22"/><ellipse cx="60" cy="60" rx="46" ry="13" transform="rotate(-25 60 60)"/><path d="M53 40c-8 10-7 26 4 39M68 41c10 9 12 22 3 36"/>',
+      atom:'<ellipse cx="60" cy="60" rx="43" ry="16"/><ellipse cx="60" cy="60" rx="43" ry="16" transform="rotate(60 60 60)"/><ellipse cx="60" cy="60" rx="43" ry="16" transform="rotate(120 60 60)"/><circle cx="60" cy="60" r="5" fill="white" stroke="none"/>',
+      dna:'<path d="M42 22c48 24-12 52 36 76M78 22c-48 24 12 52-36 76M47 30h26M43 46h34M44 63h32M46 80h28M50 91h20"/>',
+      heart:'<path d="M60 94 28 64C5 40 36 16 60 42c24-26 55-2 32 22z"/><path d="M29 62h16l7-12 11 23 8-14h20"/>',
+      brain:'<path d="M58 28c-17-16-36 1-29 16-15 9-9 29 5 31-1 16 15 23 25 11V28zm4 0c17-16 36 1 29 16 15 9 9 29-5 31 1 16-15 23-25 11V28zM43 42l14 12-9 16m29-28L63 54l9 16"/>',
+      bolt:'<path d="m66 18-32 46h24l-5 38 34-51H63z"/>',
+      engine:'<rect x="24" y="41" width="65" height="43" rx="8"/><path d="M37 41V28h32v13M89 52h10v22H89M24 54H15v21h9M36 63h40m-20-12v24"/>',
+      tool:'<path d="M88 24a26 26 0 0 0-33 32L26 86a10 10 0 0 0 14 14l30-30a26 26 0 0 0 30-35L85 51 70 48l-4-15z"/>',
+      hammer:'<path d="M55 48 91 88M47 55 29 37l12-12 19 15 16-11 14 14-28 25z"/>',
+      flask:'<path d="M49 20h22m-18 0v33L32 88a8 8 0 0 0 7 12h42a8 8 0 0 0 7-12L67 53V20M41 75h38"/><circle cx="53" cy="86" r="3"/><circle cx="66" cy="92" r="3"/>',
+      thermometer:'<path d="M52 30a10 10 0 0 1 20 0v43a21 21 0 1 1-20 0zM62 43v43"/><circle cx="62" cy="87" r="8"/>',
+      speed:'<path d="M28 83a38 38 0 1 1 64 0M60 83l22-29M34 75l-8 5m14-25-8-7m28-8V29m20 26 8-7"/>',
+      math:'<rect x="25" y="25" width="70" height="70" rx="12"/><path d="M39 49h20m-10-10v20m22-11h13M39 75h20m12-5 13 13m0-13L71 83"/>',
+      geometry:'<path d="m60 20 43 77H17zM60 20v77M17 97l63-40M60 78h18V60"/>',
+      book:'<path d="M60 38c-15-10-29-12-43-7v58c14-5 28-3 43 7 15-10 29-12 43-7V31c-14-5-28-3-43 7zm0 0v58M28 48c8-2 16-1 24 4m16 0c8-5 16-6 24-4"/>',
+      document:'<path d="M33 20h38l18 19v63H33zM71 20v19h18M45 55h31M45 68h31M45 81h23"/>',
+      puzzle:'<path d="M26 30h26c-6 13 0 18 8 18s14-5 8-18h26v26c-13-6-18 0-18 8s5 14 18 8v24H68c6-13 0-18-8-18s-14 5-8 18H26V72c13 6 18 0 18-8s-5-14-18-8z"/>'
+    };
+    const question = document.getElementById('question-text');
+    if (!question) return;
+    let lastTopic = '';
+    function updateBadge() {
+      const text = (question.textContent || '').toLowerCase();
+      const match = rules.find(([pattern]) => pattern.test(text));
+      const active = typeof state !== 'undefined' && state.currentSection
+        ? state.currentSection.key : window.currentSection || window.activeSection || '';
+      const section = String(active).toUpperCase().slice(0, 2);
+      const topic = match ? match[1] : defaults[section] || 'book';
+      if (topic === lastTopic && document.getElementById('__qbadge')) return;
+      lastTopic = topic;
+      let badge = document.getElementById('__qbadge');
+      if (!badge) {
+        badge = document.createElement('div');
+        badge.id = '__qbadge';
+        badge.style.cssText = 'display:flex;justify-content:center;align-items:center;margin:0 0 12px;user-select:none';
+        question.parentNode.insertBefore(badge, question);
+      }
+      const safeId = 'qb-' + topic;
+      badge.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="110" height="110" viewBox="0 0 120 120" role="img" aria-label="' + topic + ' illustration" style="max-width:100%;filter:drop-shadow(0 9px 8px rgba(0,0,0,.33))">'
+        + '<defs><linearGradient id="' + safeId + '-bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#475569"/><stop offset=".45" stop-color="#273449"/><stop offset="1" stop-color="#111827"/></linearGradient>'
+        + '<linearGradient id="' + safeId + '-ink" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f8fafc"/><stop offset=".45" stop-color="#67e8f9"/><stop offset="1" stop-color="#0ea5e9"/></linearGradient></defs>'
+        + '<rect x="8" y="10" width="104" height="104" rx="26" fill="url(#' + safeId + '-bg)" stroke="#738399" stroke-width="1.5"/>'
+        + '<path d="M24 18h72" stroke="white" stroke-opacity=".17" stroke-width="3" stroke-linecap="round"/>'
+        + '<g fill="none" stroke="url(#' + safeId + '-ink)" stroke-width="5" stroke-linejoin="round" stroke-linecap="round">'
+        + (drawings[topic] || drawings.book) + '</g></svg>';
+    }
+    new MutationObserver(updateBadge).observe(question, {childList:true, characterData:true, subtree:true});
+    setTimeout(updateBadge, 300);
+  })();
+  </script>
+
   <button id="float-speaker" class="float-speaker" title="Read question aloud" aria-label="Speak question">🔊</button>
 </body>
 </html>
