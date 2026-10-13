@@ -404,68 +404,28 @@
     AO: { emoji: '🔷', label: 'Assembling Objects',    color: '#1d4ed8', bg: 'rgba(29,78,216,.15)'  },
   };
 
-  // ==================== MULTI-VOICE TTS ====================
-  let ttsVoices = [];
+  // ==================== AMERICAN FEMALE VOICE ONLY ====================
   let selectedVoice = null;
   let ttsRate = 1.0;
-  let ttsPitch = 1.0;
-
+  const US_FEMALE_NAMES = ['aria','jenny','zira','samantha','ava','allison','susan','victoria','kendra','kimberly','salli','joanna','ivy','female'];
   function loadVoices() {
-    ttsVoices = window.speechSynthesis.getVoices();
+    if (!window.speechSynthesis) return;
+    const usVoices = window.speechSynthesis.getVoices().filter(v => /^en[-_]US$/i.test(v.lang));
+    selectedVoice = usVoices.find(v => US_FEMALE_NAMES.some(n => v.name.toLowerCase().includes(n))) || usVoices[0] || null;
     populateVoicePanel();
   }
-
   if (window.speechSynthesis) {
-    window.speechSynthesis.onvoiceschanged = loadVoices;
-    setTimeout(loadVoices, 500);
+    window.speechSynthesis.addEventListener('voiceschanged', loadVoices);
+    setTimeout(loadVoices, 300);
   }
-
-  const VOICE_PRESETS = [
-    { id: 'female-us',  label: '🇺🇸 American',  lang: 'en-US', preferFemale: true },
-    { id: 'female-uk',  label: '🇬🇧 British',   lang: 'en-GB', preferFemale: true },
-    { id: 'female-au',  label: '🇦🇺 Australian',lang: 'en-AU', preferFemale: true },
-    { id: 'auto',       label: '🔊 Auto',        lang: null,    preferFemale: true },
-  ];
-
-  function findVoice(preset) {
-    if (preset.id === 'auto' || !ttsVoices.length) return null;
-    let matches = ttsVoices.filter(v => v.lang && v.lang.startsWith(preset.lang.split('-')[0]));
-    if (matches.length === 0) matches = ttsVoices;
-    // Try to find gender match by name keywords
-    const femaleWords = ['female','zira','samantha','karen','moira','tessa','victoria','fiona','allison','ava','susan','kate','helen','eva'];
-    const maleWords = ['male','david','mark','daniel','rishi','lee','james','alex','fred','tom','oliver'];
-    if (preset.preferFemale === true) {
-      let f = matches.find(v => femaleWords.some(w => v.name.toLowerCase().includes(w)));
-      if (f) return f;
-    } else if (preset.preferFemale === false) {
-      let m = matches.find(v => maleWords.some(w => v.name.toLowerCase().includes(w)));
-      if (m) return m;
-    }
-    // Fallback: pick by lang
-    let langMatch = ttsVoices.find(v => v.lang === preset.lang);
-    return langMatch || matches[0] || null;
-  }
-
-  let activeVoiceId = 'auto';
-
   function populateVoicePanel() {
     const panel = document.getElementById('voice-selector-panel');
     if (!panel) return;
-    let html = '<div style="font-size:11px;color:#64748b;margin-bottom:8px;font-weight:700;letter-spacing:.05em">🗣️ READ ALOUD — FEMALE VOICE</div>';
-    html += '<div style="display:flex;flex-wrap:wrap;gap:6px">';
-    VOICE_PRESETS.forEach(p => {
-      const isActive = p.id === activeVoiceId;
-      html += `<button class="voice-btn${isActive?' active-voice':''}" data-voice-id="${p.id}" onclick="setVoice('${p.id}')">${p.label}</button>`;
-    });
-    html += '</div>';
-    panel.innerHTML = html;
-  }
-
-  function setVoice(id) {
-    activeVoiceId = id;
-    const preset = VOICE_PRESETS.find(p => p.id === id);
-    selectedVoice = preset ? findVoice(preset) : null;
-    populateVoicePanel();
+    panel.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">'
+      + '<span style="font-size:12px;color:#cbd5e1;font-weight:700">American English - Female Voice</span>'
+      + '<button type="button" id="us-voice-read-btn" class="voice-btn active-voice" aria-label="Read question aloud in American English">Read Question Aloud</button>'
+      + '</div>';
+    document.getElementById('us-voice-read-btn').addEventListener('click', speakCurrentQuestion);
   }
 
   function speak(text, forceRate) {
@@ -477,6 +437,7 @@
     utt.pitch = 1.0;
     utt.volume = 1.0;
     utt.lang = 'en-US';
+    if (!selectedVoice) loadVoices();
     if (selectedVoice) utt.voice = selectedVoice;
     utt.onstart = () => document.querySelectorAll('.speaker-btn,.float-speaker').forEach(b => b.classList.add('speaking'));
     utt.onend = utt.onerror = () => document.querySelectorAll('.speaker-btn,.float-speaker').forEach(b => b.classList.remove('speaking'));
